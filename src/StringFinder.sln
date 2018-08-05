@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StringFinder", "StringFinder\StringFinder.vcxproj", "{7DA1042A-2F46-478B-9023-182150303819}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StringFinderLib", "StringFinderLib\StringFinderLib.vcxproj", "{E5470B75-2222-432C-9AB4-538E925B2A43}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{7DA1042A-2F46-478B-9023-182150303819}.Release|x64.Build.0 = Release|x64
 		{7DA1042A-2F46-478B-9023-182150303819}.Release|x86.ActiveCfg = Release|Win32
 		{7DA1042A-2F46-478B-9023-182150303819}.Release|x86.Build.0 = Release|Win32
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Debug|x64.ActiveCfg = Debug|x64
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Debug|x64.Build.0 = Debug|x64
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Debug|x86.ActiveCfg = Debug|Win32
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Debug|x86.Build.0 = Debug|Win32
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Release|x64.ActiveCfg = Release|x64
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Release|x64.Build.0 = Release|x64
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Release|x86.ActiveCfg = Release|Win32
+		{E5470B75-2222-432C-9AB4-538E925B2A43}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
