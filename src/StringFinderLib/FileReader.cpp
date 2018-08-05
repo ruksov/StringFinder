@@ -33,6 +33,7 @@ namespace sf::lib
     bool FileReader::ReadNext(Data & data)
     {
         auto res = false;
+
         if (m_dataCount)
         {
             data.resize(m_dataSize);
@@ -47,13 +48,17 @@ namespace sf::lib
             m_lastDataSize = 0;
             res = true;
         }
+        else
+        {
+            data.resize(0);
+        }
 
         return res;
     }
 
     void FileReader::ResetImpl()
     {
-        m_file.seekg(m_file.end);
+        m_file.seekg(0, m_file.end);
         const auto fileSize = static_cast<size_t>(m_file.tellg());
 
         //
