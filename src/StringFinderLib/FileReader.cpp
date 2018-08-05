@@ -20,7 +20,7 @@ namespace sf::lib
         ResetImpl();
     }
 
-    void FileReader::ResetRead()
+    void FileReader::Reset()
     {
         ResetImpl();
     }

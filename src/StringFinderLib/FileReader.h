@@ -8,7 +8,7 @@ namespace sf::lib
     public:
         FileReader(std::wstring filePath, size_t dataSize = 100'000'000);
 
-        void ResetRead() override;
+        void Reset() override;
         bool HasNext() const noexcept override;
         bool ReadNext(Data& data) override;
 

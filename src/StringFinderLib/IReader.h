@@ -15,7 +15,7 @@ namespace sf::lib
         IReader(IReader&&) = delete;
         IReader& operator=(IReader&&) = delete;
 
-        virtual void ResetRead() = 0;
+        virtual void Reset() = 0;
         virtual bool HasNext() const noexcept = 0;
         virtual bool ReadNext(Data& data) = 0;
     };
