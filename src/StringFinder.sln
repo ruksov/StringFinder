@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StringFinder", "StringFinde
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StringFinderLib", "StringFinderLib\StringFinderLib.vcxproj", "{E5470B75-2222-432C-9AB4-538E925B2A43}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestStringFinderLib", "TestStringFinderLib\TestStringFinderLib.vcxproj", "{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{E5470B75-2222-432C-9AB4-538E925B2A43}.Release|x64.Build.0 = Release|x64
 		{E5470B75-2222-432C-9AB4-538E925B2A43}.Release|x86.ActiveCfg = Release|Win32
 		{E5470B75-2222-432C-9AB4-538E925B2A43}.Release|x86.Build.0 = Release|Win32
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Debug|x64.ActiveCfg = Debug|x64
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Debug|x64.Build.0 = Debug|x64
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Debug|x86.ActiveCfg = Debug|Win32
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Debug|x86.Build.0 = Debug|Win32
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Release|x64.ActiveCfg = Release|x64
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Release|x64.Build.0 = Release|x64
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Release|x86.ActiveCfg = Release|Win32
+		{E53A87D1-52A0-4D22-AB33-E15DF80DDE34}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

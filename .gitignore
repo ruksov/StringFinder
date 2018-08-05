@@ -1,6 +1,7 @@
 *.vs
-/bin
+*.user
 
+/bin
 /obj
 /lib
-*.user
+/tests
