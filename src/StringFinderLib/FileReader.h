@@ -6,7 +6,7 @@ namespace sf::lib
     class FileReader : public IReader
     {
     public:
-        FileReader(std::wstring filePath, size_t dataSize = 100'000'000);
+        FileReader(std::wstring filePath, size_t dataSize);
 
         void Reset() override;
         bool HasNext() const noexcept override;
