@@ -10,37 +10,47 @@ namespace sf::lib
     {
     }
 
-    Matcher::Result Matcher::TryMatch(uint32_t hsIndx, const Data & hs)
+    Matcher::Result Matcher::TryMatch(uint32_t hsIndx, const Data & haystack)
     {
-        Result res;
-        auto indxList = m_ndlCache->GetIndexList(hs.at(hsIndx));
+        Result maxRes;
+
+        auto indxList = m_ndlCache->GetIndexList(haystack.at(hsIndx));
         if (indxList.size() != 0)
         {
             auto& needle = m_ndlCache->GetNeedle();
-            for (auto ni : indxList)
+
+            uint32_t hsEnd = haystack.size();
+            uint32_t nlEnd = needle.size();
+
+            uint32_t ni = 0;
+            uint32_t hi = 0;
+
+            for (auto currentNi : indxList)
             {
-                // check index overlaping with result
-                if (ni < res.NdlOffset + res.MatchLen)
+                if (currentNi - nlEnd < m_threshold
+                    || currentNi - nlEnd < maxRes.MatchLen)
                 {
-                    continue;
+                    break;
                 }
 
-                uint32_t matchLen = 0;
-                for (uint32_t hi = hsIndx; 
-                    hi < hs.size() && matchLen < needle.size() && hs.at(hi) == needle.at(matchLen); 
-                    ++hi, ++matchLen)
+                ni = currentNi;
+                hi = hsIndx;
+
+                for ( ; hi < hsEnd && ni < nlEnd && haystack.at(hi) == needle.at(ni);
+                    ++hi, ++ni)
                 {
                 }
 
-                // result is max match lenth range
-                if (matchLen >= m_threshold && matchLen > res.MatchLen)
+                // compare with max result
+                uint32_t matchLen = ni - currentNi;
+                if (matchLen >= m_threshold && matchLen > maxRes.MatchLen)
                 {
-                    res.MatchLen = matchLen;
-                    res.NdlOffset = ni;
+                    maxRes.MatchLen = matchLen;
+                    maxRes.NdlOffset = currentNi;
                 }
             }
         }
 
-        return res;
+        return maxRes;
     }
 }

@@ -32,9 +32,6 @@
     <ClCompile Include="TestFileReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TestSortedNeedleCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
