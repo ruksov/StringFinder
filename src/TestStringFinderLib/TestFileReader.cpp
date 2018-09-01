@@ -49,19 +49,26 @@ namespace
 
 TEST_F(TestFileReader, FileOpenError)
 {
-    ASSERT_THROW(m_reader.reset(new sf::lib::FileReader(L"errorPath.txt", 0)), std::runtime_error);
+    ASSERT_THROW(m_reader.reset(new sf::lib::FileReader(L"errorPath.txt", 10)), std::runtime_error);
+}
+
+TEST_F(TestFileReader, DataSizeEqualZero)
+{
+    FillFile("test");
+    ASSERT_THROW(m_reader.reset(new sf::lib::FileReader(m_path.c_str(), 0)), std::runtime_error);
 }
 
 TEST_F(TestFileReader, ReadEmptyFile)
 {
-    m_dataSize = 10;
     ASSERT_NO_THROW(m_reader.reset(new sf::lib::FileReader(m_path.c_str(), m_dataSize)));
 
-    sf::lib::Data data;
+    std::string data;
+    auto prevSize = data.size();
 
-    ASSERT_FALSE(m_reader->HasNext());
-    ASSERT_FALSE(m_reader->ReadNext(data));
-    ASSERT_EQ(0, data.size());
+    ASSERT_TRUE(m_reader->IsEnd());
+    ASSERT_THROW(m_reader->ReadNext(data), std::runtime_error);
+    ASSERT_EQ(0, m_reader->GetIndex());
+    ASSERT_EQ(prevSize, data.size());
 }
 
 TEST_F(TestFileReader, AlignedFileSize)
@@ -75,20 +82,26 @@ TEST_F(TestFileReader, AlignedFileSize)
     ASSERT_NO_THROW(m_reader.reset(new sf::lib::FileReader(m_path.c_str(), m_dataSize)));
 
     std::string resData;
-    sf::lib::Data data;
+    std::string data;
 
-    while (m_reader->HasNext())
+    size_t index = 0;
+    while (!m_reader->IsEnd())
     {
-        ASSERT_TRUE(m_reader->ReadNext(data));
+        ASSERT_EQ(index, m_reader->GetIndex());
+        ASSERT_NO_THROW(m_reader->ReadNext(data));
         ASSERT_EQ(m_dataSize, data.size());
-        resData.insert(resData.end(), data.begin(), data.end());
+        resData += data;
+        ++index;
     }
 
     ASSERT_STREQ(fileData.c_str(), resData.c_str());
 
-    ASSERT_FALSE(m_reader->HasNext());
-    ASSERT_FALSE(m_reader->ReadNext(data));
-    ASSERT_EQ(0, data.size());
+    ASSERT_TRUE(m_reader->IsEnd());
+    ASSERT_EQ(index, m_reader->GetIndex());
+    
+    auto prevData = data;
+    ASSERT_THROW(m_reader->ReadNext(data), std::runtime_error);
+    ASSERT_STREQ(prevData.c_str(), data.c_str());
 }
 
 TEST_F(TestFileReader, NotAlignedFileSize)
@@ -103,11 +116,13 @@ TEST_F(TestFileReader, NotAlignedFileSize)
     ASSERT_NO_THROW(m_reader.reset(new sf::lib::FileReader(m_path.c_str(), m_dataSize)));
 
     std::string resData;
-    sf::lib::Data data;
+    std::string data;
 
-    while (m_reader->HasNext())
+    size_t index = 0;
+    while (!m_reader->IsEnd())
     {
-        ASSERT_TRUE(m_reader->ReadNext(data));
+        ASSERT_EQ(index, m_reader->GetIndex());
+        ASSERT_NO_THROW(m_reader->ReadNext(data));
 
         if (resData.size() == GetFileSize() - lastDataSize)
         {
@@ -121,14 +136,18 @@ TEST_F(TestFileReader, NotAlignedFileSize)
             ASSERT_EQ(m_dataSize, data.size());
         }
 
-        resData.insert(resData.end(), data.begin(), data.end());
+        resData += data;
+        ++index;
     }
 
     ASSERT_STREQ(fileData.c_str(), resData.c_str());
 
-    ASSERT_FALSE(m_reader->HasNext());
-    ASSERT_FALSE(m_reader->ReadNext(data));
-    ASSERT_EQ(0, data.size());
+    ASSERT_TRUE(m_reader->IsEnd());
+    ASSERT_EQ(index, m_reader->GetIndex());
+
+    auto prevData = data;
+    ASSERT_THROW(m_reader->ReadNext(data), std::runtime_error);
+    ASSERT_STREQ(prevData.c_str(), data.c_str());
 }
 
 TEST_F(TestFileReader, TestReset)
@@ -141,28 +160,33 @@ TEST_F(TestFileReader, TestReset)
 
     ASSERT_NO_THROW(m_reader.reset(new sf::lib::FileReader(m_path.c_str(), m_dataSize)));
 
-    sf::lib::Data data1;
-    ASSERT_TRUE(m_reader->HasNext());
-    ASSERT_TRUE(m_reader->ReadNext(data1));
+    std::string data1;
+    ASSERT_FALSE(m_reader->IsEnd());
+    ASSERT_EQ(0, m_reader->GetIndex());
+    ASSERT_NO_THROW(m_reader->ReadNext(data1));
+    
+    ASSERT_EQ(1, m_reader->GetIndex());
     ASSERT_EQ(m_dataSize, data1.size());
+    ASSERT_STREQ(fileData.c_str(), data1.c_str());
 
-    ASSERT_FALSE(m_reader->HasNext());
+    ASSERT_TRUE(m_reader->IsEnd());
 
     //
     // Reset file reader to read from start file
     //
     ASSERT_NO_THROW(m_reader->Reset());
     
-    sf::lib::Data data2;
-    ASSERT_TRUE(m_reader->HasNext());
-    ASSERT_TRUE(m_reader->ReadNext(data2));
-    ASSERT_EQ(m_dataSize, data2.size());
+    std::string data2;
+    ASSERT_FALSE(m_reader->IsEnd());
+    ASSERT_EQ(0, m_reader->GetIndex());
+    ASSERT_NO_THROW(m_reader->ReadNext(data2));
 
-    ASSERT_FALSE(m_reader->HasNext());
+    ASSERT_EQ(1, m_reader->GetIndex());
+    ASSERT_EQ(m_dataSize, data2.size());
+    ASSERT_STREQ(fileData.c_str(), data2.c_str());
+
+    ASSERT_TRUE(m_reader->IsEnd());
 
     ASSERT_EQ(data1.size(), data2.size());
-    for (uint16_t i = 0; i < data1.size(); ++i)
-    {
-        ASSERT_EQ(data1[i], data2[i]);
-    }
+    ASSERT_STREQ(data1.c_str(), data2.c_str());
 }

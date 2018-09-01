@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FileReader.h"
 #include "Exceptions.h"
+#include "Log.h"
 
 namespace sf::lib
 {
@@ -15,59 +16,54 @@ namespace sf::lib
         //
         // Open file in the end to compute file size
         //
-        m_file.open(filePath, std::ios::in | std::ios::binary);
+        m_file.open(filePath, std::ios::in | std::ios::binary | std::ios::ate);
 
-        ResetImpl();
+        const size_t fileSize = m_file.tellg();
+        THROW_IF(dataSize == 0 && fileSize != 0,
+            "Data size in file reader can't be equal 0, if file did not empty");
+
+        if (fileSize != 0)
+        {
+            m_lastDataSize = fileSize % m_dataSize;
+            m_dataCount = fileSize / m_dataSize + (m_lastDataSize != 0 ? 1 : 0);
+        }
+
+        LOG_DEBUG("Configure file reader:\n"
+            << "\tData size: " << m_dataSize << "\n"
+            << "\tData count: " << m_dataCount << '\n'
+            << "\tLast data size: " << m_lastDataSize);
+
+        m_file.seekg(0);
     }
 
     void FileReader::Reset()
     {
-        ResetImpl();
-    }
-
-    bool FileReader::HasNext() const noexcept
-    {
-        return m_dataCount != 0 || m_lastDataSize != 0;
-    }
-
-    bool FileReader::ReadNext(Data & data)
-    {
-        auto res = false;
-
-        if (m_dataCount)
-        {
-            data.resize(m_dataSize);
-            m_file.read(data.data(), m_dataSize);
-            --m_dataCount;
-            res = true;
-        }
-        else if (m_lastDataSize)
-        {
-            data.resize(m_lastDataSize);
-            m_file.read(data.data(), m_lastDataSize);
-            m_lastDataSize = 0;
-            res = true;
-        }
-        else
-        {
-            data.resize(0);
-        }
-
-        return res;
-    }
-
-    void FileReader::ResetImpl()
-    {
-        m_file.seekg(0, m_file.end);
-        const auto fileSize = static_cast<size_t>(m_file.tellg());
-
-        //
-        // Reset variables, whcih keeps information about dividing file data
-        //
-        m_dataCount = fileSize / m_dataSize;
-        m_dataSize = m_dataSize;
-        m_lastDataSize = fileSize % m_dataSize;
-
+        m_index = 0;
         m_file.seekg(0);
+    }
+
+    void FileReader::ReadNext(Data & data)
+    {
+        THROW_IF(m_index >= m_dataCount, 
+            "Failed to read next data. File reader riches to the end of file.");
+
+        LOG_DEBUG("Read file data #" << m_index);
+        
+        const auto dataSize = (m_lastDataSize != 0 && m_index == m_dataCount - 1) ? 
+            m_lastDataSize : m_dataSize;
+
+        data.resize(dataSize);
+        m_file.read(data.data(), dataSize);
+        ++m_index;
+    }
+
+    bool FileReader::IsEnd() const noexcept
+    {
+        return m_index >= m_dataCount;
+    }
+
+    size_t FileReader::GetIndex() const noexcept
+    {
+        return m_index;
     }
 }

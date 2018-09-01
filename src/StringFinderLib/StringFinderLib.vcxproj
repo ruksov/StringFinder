@@ -177,19 +177,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Buffer.h" />
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="INeedleCache.h" />
     <ClInclude Include="IReader.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="Matcher.h" />
     <ClInclude Include="SortedNeedleCache.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="FileReader.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="Matcher.cpp" />
     <ClCompile Include="SortedNeedleCache.cpp" />
     <ClCompile Include="stdafx.cpp">

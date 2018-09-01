@@ -1,8 +1,9 @@
 #pragma once
+#include <string>
 
 namespace sf::lib
 {
-    using Data = std::vector<char>;
+    using Data = std::string;
 
     struct IReader
     {
@@ -16,7 +17,8 @@ namespace sf::lib
         IReader& operator=(IReader&&) = delete;
 
         virtual void Reset() = 0;
-        virtual bool HasNext() const noexcept = 0;
-        virtual bool ReadNext(Data& data) = 0;
+        virtual void ReadNext(Data& data) = 0;
+        virtual bool IsEnd() const noexcept = 0;
+        virtual size_t GetIndex() const noexcept = 0;
     };
 }
