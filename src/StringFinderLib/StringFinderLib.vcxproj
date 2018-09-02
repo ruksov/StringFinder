@@ -177,6 +177,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DoubleBuffer.h" />
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="INeedleCache.h" />
@@ -188,6 +189,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DoubleBuffer.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Matcher.cpp" />
