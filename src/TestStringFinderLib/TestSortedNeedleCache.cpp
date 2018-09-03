@@ -20,7 +20,7 @@ TEST(TestSortedNeedleCache, GetIndexList_EmptyNeedle)
 
     do
     {
-        auto& indxList = ndlCache.GetIndexList(c);
+        auto& indxList = ndlCache.GetOffsetList(c);
         ASSERT_EQ(0, indxList.size());
         ++c;
     } while (c != charMin);
@@ -32,9 +32,9 @@ TEST(TestSortedNeedleCache, GetIndexList_Normal)
     sf::lib::SortedNeedleCache ndlCache(testNdl);
 
     // get index list for all needle character
-    auto& tIndxList = ndlCache.GetIndexList('t');
-    auto& eIndxList = ndlCache.GetIndexList('e');
-    auto& sIndxList = ndlCache.GetIndexList('s');
+    auto& tIndxList = ndlCache.GetOffsetList('t');
+    auto& eIndxList = ndlCache.GetOffsetList('e');
+    auto& sIndxList = ndlCache.GetOffsetList('s');
 
     auto checkList = [&testNdl](char c, size_t charCount, auto& indxList)
     {
@@ -58,7 +58,7 @@ TEST(TestSortedNeedleCache, GetIndexList_Normal)
         if (c != 't' && c != 'e' && c != 's')
         {
             // index lists for all other chars must be empty
-            auto& indxList = ndlCache.GetIndexList(c);
+            auto& indxList = ndlCache.GetOffsetList(c);
             ASSERT_EQ(0, indxList.size());
         }
         ++c;

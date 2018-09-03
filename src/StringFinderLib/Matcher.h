@@ -1,27 +1,30 @@
 #pragma once
+#include "Result.h"
 #include "IReader.h"
 #include "INeedleCache.h"
 
 namespace sf::lib
 {
+    using NeedleCachePtr = std::unique_ptr<INeedleCache>;
+
     class Matcher
     {
     public:
-        struct Result
-        {
-            uint32_t MatchLen = 0;
-            uint32_t NdlOffset = 0;
+        Matcher(size_t threshold, NeedleCachePtr needleCache);
 
-            bool isValid() { return MatchLen != 0; }
-        };
-
-    public:
-        Matcher(uint32_t threshold, std::unique_ptr<INeedleCache> ndlCache);
-
-        Result TryMatch(uint32_t hsIndx, const Data& hs);
+        size_t Match(size_t hsIndex, size_t hsOffset, const Data& hs);
 
     private:
+        Result CompareData(size_t nlOffset, const Data& nl, size_t hsOffset, const Data& hs);
+        
+        Result MatchHaystack(size_t hsOffset, const Data& hs);      
+        Result MatchHaystackBegin(const Data& hs);
+        bool MatchHaystackEnd(size_t hsOffset, const Data& hs);
+
+    private:
+        ResultList m_results;
+        std::map<size_t, Result> m_combineResults;
         const size_t m_threshold;
-        const std::unique_ptr<INeedleCache> m_ndlCache;
+        const NeedleCachePtr m_needleCache;
     };
 }

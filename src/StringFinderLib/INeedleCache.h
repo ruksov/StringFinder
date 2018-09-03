@@ -3,7 +3,8 @@
 
 namespace sf::lib
 {
-    using IndexList = std::vector<uint32_t>;
+    using OffsetList = std::vector<size_t>;
+    using Data = std::string;
 
     struct INeedleCache
     {
@@ -16,7 +17,7 @@ namespace sf::lib
         INeedleCache(INeedleCache&&) = delete;
         INeedleCache& operator=(INeedleCache&&) = delete;
 
-        virtual const IndexList& GetIndexList(char c) const = 0;
-        virtual const std::string& GetNeedle() const = 0;
+        virtual const OffsetList& GetOffsetList(char c) const = 0;
+        virtual const Data& GetNeedle() const = 0;
     };
 }
