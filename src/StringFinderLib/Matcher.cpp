@@ -66,20 +66,18 @@ namespace sf::lib
         THROW_IF(hsOffset >= hs.size(), "Haystack offset for matcher is bigger than haystack chunck size.");
 
         Result maxRes;
-        auto& offsetList = m_needleCache->GetOffsetList(hs.front());
+        auto& offsetList = m_needleCache->GetOffsetList(hs.at(hsOffset));
         auto& needle = m_needleCache->GetNeedle();
         const auto nlSize = needle.size();
 
         for (auto nlOffset : offsetList)
         {
-            const auto it = m_combineResults.find(nlOffset);
-
             if (nlSize - nlOffset < m_threshold || nlSize - nlOffset < maxRes.MatchLen)
             {
                 break;
             }
 
-            const auto res = CompareData(nlOffset, needle, 0, hs);
+            const auto res = CompareData(nlOffset, needle, hsOffset, hs);
 
             if (res.MatchLen >= m_threshold && res.MatchLen > maxRes.MatchLen)
             {

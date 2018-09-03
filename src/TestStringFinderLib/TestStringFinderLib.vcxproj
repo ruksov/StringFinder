@@ -205,6 +205,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TestDoubleBuffer.cpp" />
     <ClCompile Include="TestFileReader.cpp" />
+    <ClCompile Include="TestMatcher.cpp" />
     <ClCompile Include="TestSortedNeedleCache.cpp" />
   </ItemGroup>
   <ItemGroup>
