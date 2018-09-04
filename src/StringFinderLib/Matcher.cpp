@@ -14,34 +14,28 @@ namespace sf::lib
 
     size_t sf::lib::Matcher::Match(size_t hsIndex, size_t hsOffset, const Data& hs)
     {
+        {
+            const auto bytesToTheEnd = hs.size() - hsOffset;
+            if ( bytesToTheEnd < m_threshold && MatchHaystackEnd(hsOffset, hs))
+            {
+                return bytesToTheEnd;
+            }
+        }
+        
         Result res;
 
         if (hsOffset == 0)
         {
             res = MatchHaystackBegin(hs);
         }
-        else if (hs.size() - hsOffset < m_threshold)
-        {
-            if (MatchHaystackEnd(hsOffset, hs))
-            {
-                res.MatchLen = hs.size() - hsOffset;
-            }
-        }
         else
         {
             res = MatchHaystack(hsOffset, hs);
         }
 
-        res.HsOffset += hs.size() * (hsIndex - res.HsOffset != hsOffset ? 1 : 0);
-        
-        if (!m_results.empty()
-            && m_results.back().NlOffset + m_results.back().MatchLen == res.NlOffset)
+        if (res.MatchLen != 0)
         {
-            m_results.back().MatchLen += res.MatchLen;
-        }
-        else
-        {
-            m_results.push_back(res);
+            PushToResults(hsIndex, hs.size(), res, hsOffset != res.HsOffset);
         }
 
         return res.MatchLen;
@@ -134,7 +128,7 @@ namespace sf::lib
 
     bool Matcher::MatchHaystackEnd(size_t hsOffset, const Data & hs)
     {
-        assert(hs.size() - hsIndex < m_threshold);
+        assert(hs.size() - hsOffset < m_threshold);
         assert(m_combineResults.empty());
         THROW_IF(hsOffset >= hs.size(), "Haystack offset for matcher is bigger than haystack chunck size.");
 
@@ -152,5 +146,33 @@ namespace sf::lib
         }
         
         return !m_combineResults.empty();
+    }
+
+    void Matcher::PushToResults(size_t hsIndex, size_t hsSize, const Result & res, bool isCombineResult)
+    {
+        if (!m_results.empty())
+        {
+            auto& prevRes = m_results.back();
+            if (prevRes.NlOffset + prevRes.MatchLen == res.NlOffset)
+            {
+                prevRes.MatchLen += res.MatchLen;
+
+                LOG_DEBUG("Found match result wich is continue of previous.\n"
+                    << "Fixed match result:\n"
+                    << "\tHsOffset = " << prevRes.HsOffset << '\n'
+                    << "\tNlOffset = " << prevRes.NlOffset << '\n'
+                    << "\tMatchLen = " << prevRes.MatchLen << '\n');
+
+                return;
+            }
+        }
+
+        const auto fixedHsOffset = res.HsOffset + hsSize * (hsIndex - (isCombineResult ? 1 : 0));
+
+        LOG_DEBUG("Found new match result:\n"
+            << "\tHsOffset = " << fixedHsOffset << '\n'
+            << "\tNlOffset = " << res.NlOffset << '\n'
+            << "\tMatchLen = " << res.MatchLen << '\n');
+        m_results.emplace_back(fixedHsOffset, res.NlOffset, res.MatchLen);
     }
 }

@@ -22,6 +22,8 @@ namespace sf::lib
         Result MatchHaystackBegin(const Data& hs);
         bool MatchHaystackEnd(size_t hsOffset, const Data& hs);
 
+        void PushToResults(size_t hsIndex, size_t hsSize, const Result& res, bool isCombineResult);
+
     private:
         ResultList m_results;
         std::map<size_t, Result> m_combineResults;
