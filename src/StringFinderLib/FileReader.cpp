@@ -47,8 +47,6 @@ namespace sf::lib
         THROW_IF(m_index >= m_dataCount, 
             "Failed to read next data. File reader riches to the end of file.");
 
-        LOG_DEBUG("Read file data #" << m_index);
-        
         const auto dataSize = (m_lastDataSize != 0 && m_index == m_dataCount - 1) ? 
             m_lastDataSize : m_dataSize;
 

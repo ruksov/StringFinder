@@ -7,6 +7,6 @@ namespace sf::lib
     {
         static std::mutex m;
         std::lock_guard lock(m);
-        std::wcout << ss.str() << '\n';
+        std::wcout <<__TIME__ << " " << ss.str() << '\n';
     }
 }

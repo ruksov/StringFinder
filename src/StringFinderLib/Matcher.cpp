@@ -15,10 +15,12 @@ namespace sf::lib
     size_t sf::lib::Matcher::Match(size_t hsIndex, size_t hsOffset, const Data& hs)
     {
         {
+            // When range between hsOffset and haystacks end less than threshold,
+            // run specific match function to try finc first part for combine result
             const auto bytesToTheEnd = hs.size() - hsOffset;
-            if ( bytesToTheEnd < m_threshold && MatchHaystackEnd(hsOffset, hs))
+            if ( bytesToTheEnd < m_threshold)
             {
-                return bytesToTheEnd;
+                return MatchHaystackEnd(hsOffset, hs) ? bytesToTheEnd : 0;
             }
         }
         
@@ -33,7 +35,7 @@ namespace sf::lib
             res = MatchHaystack(hsOffset, hs);
         }
 
-        bool isCombineResult = hsOffset != res.HsOffset;
+        const bool isCombineResult = hsOffset != res.HsOffset;
         if (res.MatchLen != 0)
         {
             PushToResults(hsIndex, hs.size(), res, isCombineResult);

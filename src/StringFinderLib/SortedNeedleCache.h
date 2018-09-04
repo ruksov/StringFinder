@@ -6,13 +6,13 @@ namespace sf::lib
     class SortedNeedleCache : public INeedleCache
     {
     public:
-        SortedNeedleCache(std::string needle);
+        SortedNeedleCache(std::wstring needlePath);
 
         const OffsetList& GetOffsetList(char c) const override;
-        const Data& GetNeedle() const noexcept override;
+        const Data& GetNeedle() const override;
 
     private:
-        std::string m_needle;
+        Data m_needle;
         std::map<char, OffsetList> m_cache;
         mutable std::future<void> m_initWait;
 
