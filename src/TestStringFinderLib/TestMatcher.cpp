@@ -148,6 +148,9 @@ TEST_F(TestMatcher, MatchMiddle_FixPrevResult)
     ASSERT_EQ(1, m_matcher->GetResults().size());
 
     auto& testRes = m_matcher->GetResults().back();
+    auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
     ASSERT_EQ(expectRes.HsOffset, testRes.HsOffset);
     ASSERT_EQ(expectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(expectRes.MatchLen, testRes.MatchLen);
@@ -158,6 +161,9 @@ TEST_F(TestMatcher, MatchMiddle_FixPrevResult)
     ASSERT_EQ(1, m_matcher->GetResults().size());
 
     auto& fixedTestRes = m_matcher->GetResults().back();
+    nlPart = m_needle.substr(fixedTestRes.NlOffset, fixedTestRes.MatchLen);
+    hsPart = m_haystack.substr(fixedTestRes.HsOffset, fixedTestRes.MatchLen);
+    ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
     ASSERT_EQ(fixedExpectRes.HsOffset, fixedTestRes.HsOffset);
     ASSERT_EQ(fixedExpectRes.NlOffset, fixedTestRes.NlOffset);
     ASSERT_EQ(fixedExpectRes.MatchLen, fixedTestRes.MatchLen);
@@ -166,9 +172,11 @@ TEST_F(TestMatcher, MatchMiddle_FixPrevResult)
 TEST_F(TestMatcher, MatchMiddle_FixHsOffset)
 {
     SetParams(3, 2, "needletest", "hssomehstest", { 6 });
-    auto hsPart = m_haystack.substr(6, 6);
+    auto hsChunck = m_haystack.substr(6, 6);
     size_t hsIndex = 1;
-    sf::lib::Result expectRes(m_hsOffset + (hsIndex * hsPart.size()), m_offsetList[0], sizeof("test") - 1);
+    sf::lib::Result expectRes(m_hsOffset + (hsIndex * hsChunck.size())
+        , m_offsetList[0]
+        , sizeof("test") - 1);
 
     EXPECT_CALL(*m_mock, GetNeedle())
         .WillOnce(ReturnRef(m_needle));
@@ -180,11 +188,129 @@ TEST_F(TestMatcher, MatchMiddle_FixHsOffset)
 
     // Match function must fix hs offset 
     // and create result with value = m_hsOffset + (hsIndex * hsPart.size())
-    ASSERT_EQ(expectRes.MatchLen, m_matcher->Match(hsIndex, m_hsOffset, hsPart));
+    ASSERT_EQ(expectRes.MatchLen, m_matcher->Match(hsIndex, m_hsOffset, hsChunck));
     ASSERT_EQ(1, m_matcher->GetResults().size());
 
     auto& testRes = m_matcher->GetResults().back();
+    auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
     ASSERT_EQ(expectRes.HsOffset, testRes.HsOffset);
     ASSERT_EQ(expectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(expectRes.MatchLen, testRes.MatchLen);
+}
+
+TEST_F(TestMatcher, MatchEnd_EmptyOffsetList)
+{
+    SetParams(2, 2, "test", "test", {});
+    EXPECT_CALL(*m_mock, GetNeedle())
+        .WillOnce(ReturnRef(m_needle));
+
+    EXPECT_CALL(*m_mock, GetOffsetList(m_haystack.at(m_hsOffset)))
+        .WillOnce(ReturnRef(m_offsetList));
+
+    ASSERT_NO_THROW(ResetMatcher());
+    ASSERT_EQ(0, m_matcher->Match(0, m_hsOffset, m_haystack));
+    ASSERT_EQ(0, m_matcher->GetResults().size());
+}
+
+TEST_F(TestMatcher, MatchEnd_MatchToTheEnd)
+{
+    SetParams(4, 3, "abcda", "hsacda", { 2 });
+    auto bytesToTheHsEnd = m_haystack.size() - m_hsOffset;
+    ASSERT_LT(bytesToTheHsEnd, m_threshold);
+
+    EXPECT_CALL(*m_mock, GetNeedle())
+        .WillOnce(ReturnRef(m_needle));
+
+    EXPECT_CALL(*m_mock, GetOffsetList(m_haystack.at(m_hsOffset)))
+        .WillOnce(ReturnRef(m_offsetList));
+
+    ASSERT_NO_THROW(ResetMatcher());
+    ASSERT_EQ(bytesToTheHsEnd, m_matcher->Match(0, m_hsOffset, m_haystack));
+    ASSERT_EQ(0, m_matcher->GetResults().size());
+}
+
+TEST_F(TestMatcher, MatchBegin_CombineWithEnd_SecondPartLessThenThreshold)
+{
+    SetParams(5, 2, "needlet", "hsneedletest", { 0 });
+    auto hs1 = m_haystack.substr(0, 6);
+    auto hs2 = m_haystack.substr(6, 6);
+    auto bytesToTheHsEnd = hs1.size() - m_hsOffset;
+    size_t secondPartLen = 3;
+    sf::lib::OffsetList offsetList = { 4 };
+
+    sf::lib::Result combineExpectRes(m_hsOffset, 0, m_needle.size());
+
+    ASSERT_LT(bytesToTheHsEnd, m_threshold);
+
+    EXPECT_CALL(*m_mock, GetNeedle())
+        .WillOnce(ReturnRef(m_needle))
+        .WillOnce(ReturnRef(m_needle));
+
+    EXPECT_CALL(*m_mock, GetOffsetList(hs1.at(m_hsOffset)))
+        .WillOnce(ReturnRef(m_offsetList));
+
+    EXPECT_CALL(*m_mock, GetOffsetList(hs2.at(0)))
+        .WillOnce(ReturnRef(offsetList));
+
+    ASSERT_NO_THROW(ResetMatcher());
+
+    // First match must return count of bytes to end of haystack 
+    ASSERT_EQ(bytesToTheHsEnd, m_matcher->Match(0, m_hsOffset, hs1));
+    ASSERT_EQ(0, m_matcher->GetResults().size());
+
+    // Second match call in begin of next chunck must combine results in one
+    ASSERT_EQ(secondPartLen, m_matcher->Match(1, 0, hs2));
+    ASSERT_EQ(1, m_matcher->GetResults().size());
+
+    auto& testRes = m_matcher->GetResults().back();
+    auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
+    ASSERT_EQ(combineExpectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(combineExpectRes.NlOffset, testRes.NlOffset);
+    ASSERT_EQ(combineExpectRes.MatchLen, testRes.MatchLen);
+}
+
+TEST_F(TestMatcher, MatchBegin_CombineWithEnd_ChoseMaxCombineResult)
+{
+    SetParams(5, 2, "needletletest", "hsneedletest", { 0 });
+    auto hs1 = m_haystack.substr(0, 6);
+    auto hs2 = m_haystack.substr(6, 6);
+    auto bytesToTheHsEnd = hs1.size() - m_hsOffset;
+    size_t secondPartLen = 3;
+    sf::lib::OffsetList offsetList = { 4, 7 };
+
+    sf::lib::Result combineExpectRes(m_hsOffset, 0,sizeof("needlet") - 1);
+
+    ASSERT_LT(bytesToTheHsEnd, m_threshold);
+
+    EXPECT_CALL(*m_mock, GetNeedle())
+        .WillOnce(ReturnRef(m_needle))
+        .WillOnce(ReturnRef(m_needle));
+
+    EXPECT_CALL(*m_mock, GetOffsetList(hs1.at(m_hsOffset)))
+        .WillOnce(ReturnRef(m_offsetList));
+
+    EXPECT_CALL(*m_mock, GetOffsetList(hs2.at(0)))
+        .WillOnce(ReturnRef(offsetList));
+
+    ASSERT_NO_THROW(ResetMatcher());
+
+    // First match must return count of bytes to end of haystack 
+    ASSERT_EQ(bytesToTheHsEnd, m_matcher->Match(0, m_hsOffset, hs1));
+    ASSERT_EQ(0, m_matcher->GetResults().size());
+
+    // Second match call in begin of next chunck must combine results in one
+    ASSERT_EQ(secondPartLen, m_matcher->Match(1, 0, hs2));
+    ASSERT_EQ(1, m_matcher->GetResults().size());
+
+    auto& testRes = m_matcher->GetResults().back();
+    auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
+    ASSERT_EQ(combineExpectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(combineExpectRes.NlOffset, testRes.NlOffset);
+    ASSERT_EQ(combineExpectRes.MatchLen, testRes.MatchLen);
 }

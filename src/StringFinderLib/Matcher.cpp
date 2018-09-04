@@ -33,9 +33,14 @@ namespace sf::lib
             res = MatchHaystack(hsOffset, hs);
         }
 
+        bool isCombineResult = hsOffset != res.HsOffset;
         if (res.MatchLen != 0)
         {
-            PushToResults(hsIndex, hs.size(), res, hsOffset != res.HsOffset);
+            PushToResults(hsIndex, hs.size(), res, isCombineResult);
+            if (isCombineResult)
+            {
+                res.MatchLen -= hs.size() - (res.HsOffset % hs.size());
+            }
         }
 
         return res.MatchLen;
