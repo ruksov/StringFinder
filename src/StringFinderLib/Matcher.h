@@ -13,6 +13,7 @@ namespace sf::lib
         Matcher(size_t threshold, NeedleCachePtr needleCache);
 
         size_t Match(size_t hsIndex, size_t hsOffset, const Data& hs);
+        const ResultList& GetResults() const noexcept;
 
     private:
         Result CompareData(size_t nlOffset, const Data& nl, size_t hsOffset, const Data& hs);

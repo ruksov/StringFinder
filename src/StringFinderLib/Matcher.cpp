@@ -47,6 +47,11 @@ namespace sf::lib
         return res.MatchLen;
     }
 
+    const ResultList & Matcher::GetResults() const noexcept
+    {
+        return m_results;
+    }
+
     Result Matcher::CompareData(size_t nlOffset, const Data& nl, size_t hsOffset, const Data& hs)
     {
         size_t matchLen = 0;
