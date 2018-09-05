@@ -207,6 +207,7 @@
     <ClCompile Include="TestFileReader.cpp" />
     <ClCompile Include="TestMatcher.cpp" />
     <ClCompile Include="TestSortedNeedleCache.cpp" />
+    <ClCompile Include="TestUnorderedNeedleCache.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StringFinderLib\StringFinderLib.vcxproj">
