@@ -55,10 +55,7 @@ TEST_F(TestUnorderedNeedleCache, TestCompare_OneResult)
     std::vector<sf::lib::Result> results;
     auto resultCb = [&results](sf::lib::Result res)
     {
-        if (res.MatchLen == 6)
-        {
-            results.push_back(res);
-        }
+        results.push_back(res);
         return true;
     };
 

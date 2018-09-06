@@ -57,46 +57,57 @@ namespace sf::lib
             m_waitInit.get();
         }
 
-        auto diffStrings = std::ref(m_cache);
-        auto it = diffStrings.get().find(NeedleKey(hs.at(hsOffset), 0));
-
-        const size_t hsSize = hs.size();
-        const size_t nlSize = m_needle.size(); 
-        size_t currentNlOffset = 0;
-        size_t currentHsOffset = hsOffset;
-
-        while (it != diffStrings.get().end())
+        auto res = FindLastValue(hsOffset, hs);
+        if (!res)
         {
-            currentNlOffset = it->second.Offset + it->first.DiffOffset;
+            return;
+        }
 
-            for (; currentHsOffset < hsSize
-                && currentNlOffset < nlSize
-                && hs.at(currentHsOffset) == m_needle.at(currentNlOffset)
-                ; ++currentNlOffset, ++currentHsOffset);
-
-            if (handleResultCb)
+        if (handleResultCb)
+        {
+            if (handleResultCb(Result(hsOffset, res.value().It->second.Offset, res.value().MatchLen)))
             {
-                // Send compare result to caller
-                handleResultCb(Result(hsOffset, it->second.Offset, currentHsOffset - hsOffset));
-
-                for (auto offset : it->second.SubStringOffsets)
+                for (auto subStrOffset : res.value().It->second.SubStringOffsets)
                 {
-                    if (!handleResultCb(Result(hsOffset, offset, nlSize - offset)))
-                    {
-                        break;
-                    }
+                    handleResultCb(Result(hsOffset, subStrOffset, res.value().MatchLen));
                 }
             }
+        }
+    }
 
-            if (currentNlOffset == nlSize || currentHsOffset == hsSize)
+    std::optional<UnorderedNeedleCache::CompareResult> UnorderedNeedleCache::FindLastValue(size_t offset, const Data & data)
+    {
+        CompareResult res;
+        auto cache = std::ref(m_cache);
+        const size_t nlSize = m_needle.size();
+        const size_t dataSize = data.size();
+        auto it = m_cache.find(NeedleKey(data.at(offset), 0));
+
+        while (it != cache.get().cend())
+        {
+            res.It = it;
+            bool isCacheEnd = it->second.Offset + res.MatchLen < nlSize;
+            bool isDataEnd = offset + res.MatchLen < dataSize;
+
+            for (
+                ; isCacheEnd && isDataEnd 
+                && data.at(offset + res.MatchLen) == m_needle.at(it->second.Offset + res.MatchLen)
+                ; ++res.MatchLen)
             {
-                // There are no more elements to compare
-                return;
+                isCacheEnd = it->second.Offset + res.MatchLen < nlSize;
+                isDataEnd = offset + res.MatchLen < dataSize;
             }
 
-            diffStrings = std::ref(it->second.DiffStrings);
-            it = diffStrings.get().find(NeedleKey(hs.at(currentHsOffset), currentNlOffset - it->second.Offset));
+            if (isCacheEnd || isDataEnd)
+            {
+                break;
+            }
+
+            cache = std::ref(it->second.DiffStrings);
+            it = cache.get().find(NeedleKey(data.at(offset + res.MatchLen), res.MatchLen));
         }
+
+        return res.MatchLen != 0 ? std::make_optional(res) : std::nullopt;
     }
 #pragma warning (pop)
 }
