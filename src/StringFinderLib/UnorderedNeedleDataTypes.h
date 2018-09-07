@@ -32,12 +32,14 @@ namespace sf::lib
 
     struct NeedleValue;
     using NeedleStrHashTable = std::unordered_map<NeedleKey, NeedleValue, NeedleKeyHash>;
+    using ConstCacheValue = NeedleStrHashTable::const_iterator;
 
     struct NeedleValue
     {
         size_t Offset;
-        std::vector<size_t> SubStringOffsets;
+        ConstCacheValue NextDataChar;
         NeedleStrHashTable DiffStrings;
+        std::vector<size_t> SubStringOffsets;
 
         explicit NeedleValue(size_t offset) noexcept
             : Offset(offset)

@@ -20,29 +20,62 @@ namespace sf::lib
             
             size_t i = 0;
             const size_t nlSize = needle.size();
+            std::vector<size_t> matchLenList{ 0 };
             size_t subOffset = 0;
             size_t parrentOffset = 0; 
+            size_t diffOffset = 0;
+
             for (auto c : needle)
             {
+                assert(matchLenList.size() >= 1);
                 auto it = cache.emplace(NeedleKey(c, 0), NeedleValue(i));
+                auto matchLenIt = matchLenList.begin();
 
                 while (!it.second)
                 {
-                    subOffset = i + it.first->first.DiffOffset;
-                    parrentOffset = it.first->second.Offset + it.first->first.DiffOffset;
+                    // save offset from which current node in diff tree different from root
+                    diffOffset = it.first->first.DiffOffset;
+                    
+                    if (matchLenIt == matchLenList.end())
+                    {
+                        matchLenList.push_back(0);
+                        matchLenIt = matchLenList.end() - 1;
+                    }
+
+                    if (*matchLenIt != 0)
+                    {
+                        // at this level of tree we already compare strings,
+                        // so we get this matchLen - 1, becase it match length was in previous element
+                        diffOffset += --*matchLenIt;
+                    }
+
+                    // get offsets for parrent and sub string 
+                    // wich starts from different offset from previous comparation
+                    subOffset = i + diffOffset;
+                    parrentOffset = it.first->second.Offset + diffOffset;
 
                     for (; subOffset < nlSize && needle.at(parrentOffset) == needle.at(subOffset)
-                        ; ++subOffset, ++parrentOffset);
+                        ; ++subOffset, ++parrentOffset)
+                    {
+                        ++*matchLenIt;
+                    }
 
                     if (nlSize - subOffset == 0)
                     {
                         it.first->second.SubStringOffsets.push_back(i);
                         break;
                     }
-
+                        
+                    ++matchLenIt;
                     it = it.first->second.DiffStrings.emplace(
-                        NeedleKey(needle.at(subOffset), subOffset - i),
-                        NeedleValue(i));
+                            NeedleKey(needle.at(subOffset), subOffset - i),
+                            NeedleValue(i));
+                }
+
+                //assert(matchLenIt == matchLenList.end() || matchLenIt == matchLenList.begin());
+                if (matchLenList.size() != 1 && matchLenList.back() == 0)
+                {
+                    matchLenList.pop_back();
                 }
 
                 ++i;
@@ -83,22 +116,25 @@ namespace sf::lib
         const size_t dataSize = data.size();
         auto it = m_cache.find(NeedleKey(data.at(offset), 0));
 
+        auto isCacheEnd = [&res, nlSize]()
+        {
+            return res.It->second.Offset + res.MatchLen >= nlSize;
+        };
+
+        auto isDataEnd = [offset, &res, dataSize]()
+        {
+            return offset + res.MatchLen >= dataSize;
+        };
+
         while (it != cache.get().cend())
         {
             res.It = it;
-            bool isCacheEnd = it->second.Offset + res.MatchLen < nlSize;
-            bool isDataEnd = offset + res.MatchLen < dataSize;
-
             for (
-                ; isCacheEnd && isDataEnd 
+                ; !isCacheEnd() && !isDataEnd()
                 && data.at(offset + res.MatchLen) == m_needle.at(it->second.Offset + res.MatchLen)
-                ; ++res.MatchLen)
-            {
-                isCacheEnd = it->second.Offset + res.MatchLen < nlSize;
-                isDataEnd = offset + res.MatchLen < dataSize;
-            }
+                ; ++res.MatchLen);
 
-            if (isCacheEnd || isDataEnd)
+            if (isCacheEnd() || isDataEnd())
             {
                 break;
             }
