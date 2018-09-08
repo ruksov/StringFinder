@@ -20,11 +20,12 @@ namespace sf
             needleSize = file.tellg();
         }
 
-        LOG_INFO("Initialize needle cache");
-        auto needleCache = std::make_unique<lib::SortedNeedleCache>(std::move(needlePath));
+        //LOG_INFO("Initialize needle cache");
+        //auto needleCache = std::make_unique<lib::SortedNeedleCache>(std::move(needlePath));
 
         LOG_INFO("Initialize matcher");
-        m_matcher = std::make_unique<lib::Matcher>(threshold, std::move(needleCache));
+        m_matcher = std::make_unique<lib::LinearMatcher>(threshold, std::move(needlePath));
+        LOG_INFO("Finish initialize matcher");;
 
         LOG_INFO("Initialize reader for haystack buffer");
         auto haystackReader = std::make_unique<lib::FileReader>(std::move(haystackPath), needleSize);

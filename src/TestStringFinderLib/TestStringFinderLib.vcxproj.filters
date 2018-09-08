@@ -41,7 +41,7 @@
     <ClCompile Include="TestMatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestUnorderedNeedleCache.cpp">
+    <ClCompile Include="TestDiffCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

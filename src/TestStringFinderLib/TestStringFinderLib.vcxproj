@@ -203,11 +203,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TestDiffCache.cpp" />
     <ClCompile Include="TestDoubleBuffer.cpp" />
     <ClCompile Include="TestFileReader.cpp" />
     <ClCompile Include="TestMatcher.cpp" />
     <ClCompile Include="TestSortedNeedleCache.cpp" />
-    <ClCompile Include="TestUnorderedNeedleCache.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StringFinderLib\StringFinderLib.vcxproj">

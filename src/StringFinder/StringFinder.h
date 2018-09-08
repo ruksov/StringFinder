@@ -1,6 +1,7 @@
 #pragma once
 #include "DoubleBuffer.h"
 #include "Matcher.h"
+#include "LinearMatcher.h"
 
 namespace sf
 {
@@ -11,7 +12,7 @@ namespace sf
         void PrintResults() const;
 
     private:
-        std::unique_ptr<lib::Matcher> m_matcher;
+        std::unique_ptr<lib::LinearMatcher> m_matcher;
         std::unique_ptr<lib::DoubleBuffer> m_haystack;
     };
 }

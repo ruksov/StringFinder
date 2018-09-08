@@ -48,10 +48,13 @@
     <ClInclude Include="Result.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnorderedNeedleCache.h">
+    <ClInclude Include="DiffCacheTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnorderedNeedleDataTypes.h">
+    <ClInclude Include="DiffCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearMatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,7 +77,10 @@
     <ClCompile Include="DoubleBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UnorderedNeedleCache.cpp">
+    <ClCompile Include="DiffCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinearMatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
