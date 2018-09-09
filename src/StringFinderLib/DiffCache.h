@@ -3,5 +3,6 @@
 
 namespace sf::lib::diff_cache
 {
-    DiffCache Create(const std::string& cacheData);
+    using DiffCachePtr = std::unique_ptr<DiffCache>;
+    DiffCachePtr Create(const std::string& cacheData);
 }

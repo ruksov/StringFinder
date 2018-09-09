@@ -51,25 +51,25 @@ namespace sf
 
     void StringFinder::PrintResults() const
     {
-        THROW_IF(!m_matcher, "Before you print the result, you need to start the search");
-        std::wstringstream st;
-        st << "Results: ";
-        
-        auto& results = m_matcher->GetResults();
-        if (results.empty())
-        {
-            st << "empty";
-            LOG_INFO(st.str());
-            return;
-        }
+        //THROW_IF(!m_matcher, "Before you print the result, you need to start the search");
+        //std::wstringstream st;
+        //st << "Results: ";
+        //
+        //auto& results = m_matcher->GetResults();
+        //if (results.empty())
+        //{
+        //    st << "empty";
+        //    LOG_INFO(st.str());
+        //    return;
+        //}
 
-        st << '\n';
-        for (auto& res : results)
-        {
-            st << "\tsequence of length = " << res.MatchLen
-                << " found at haystack offset " << res.HsOffset
-                << ", needle offset " << res.NlOffset << '\n';
-        }
-        LOG_INFO(st.str());
+        //st << '\n';
+        //for (auto& res : results)
+        //{
+        //    st << "\tsequence of length = " << res.MatchLen
+        //        << " found at haystack offset " << res.HsOffset
+        //        << ", needle offset " << res.NlOffset << '\n';
+        //}
+        //LOG_INFO(st.str());
     }
 }

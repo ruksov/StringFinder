@@ -1,15 +1,15 @@
 #pragma once
 #include <functional>
-#include <optional>
+#include <memory>
 
 namespace sf::lib::diff_cache
 {
     struct Key
     {
+        uint32_t DiffOffset = 0;
         char DiffChar = 0;
-        size_t DiffOffset = 0;
 
-        Key(char diffCahr, size_t diffOffset) noexcept
+        Key(char diffCahr, uint32_t diffOffset) noexcept
             : DiffChar(diffCahr)
             , DiffOffset(diffOffset)
         {
@@ -26,8 +26,9 @@ namespace sf::lib::diff_cache
     {
         size_t operator()(Key const& k) const noexcept
         {
-            const size_t h = std::hash<char>()(k.DiffChar);
-            return h ^ (k.DiffOffset << 1);
+            const size_t h1 = std::hash<char>()(k.DiffChar);
+            const size_t h2 = std::hash<uint32_t>()(k.DiffOffset);
+            return h1 ^ (h2 << 1);
         }
     };
 
@@ -36,19 +37,19 @@ namespace sf::lib::diff_cache
 
     using Iterator = DiffCache::iterator;
     using ConstIterator = DiffCache::const_iterator;
-    using OffsetList = std::vector<size_t>;
+    using OffsetList = std::vector<uint32_t>;
 
     struct Value
     {
-        size_t Offset;
-        OffsetList SubStrings;
-        DiffCache DiffStrings;
-        std::optional<Iterator> NextDataByte;
+        std::unique_ptr<DiffCache> DiffStrings;
+        std::unique_ptr<OffsetList> SubStrings;
+        std::unique_ptr<Iterator> NextDataByte;
+        uint32_t Offset;
 
-        explicit Value(size_t offset) noexcept
+        explicit Value(uint32_t offset) noexcept
             : Offset(offset)
         {
         }
-        #pragma warning (suppress : 26495)
+        //#pragma warning (suppress : 26495)
     };
 }

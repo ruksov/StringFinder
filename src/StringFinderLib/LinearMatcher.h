@@ -12,7 +12,6 @@ namespace sf::lib
         LinearMatcher(size_t threshold, std::wstring filePath);
 
         size_t Match(size_t hsIndex, size_t hsOffset, const Data& hs);
-        const ResultList& GetResults() const noexcept;
 
     private:
         size_t CompareData(size_t nlOffset, size_t hsOffset, const Data& hs);
@@ -25,11 +24,12 @@ namespace sf::lib
 
     private:
         size_t m_threshold;
-        ResultList m_results;
+        bool m_resultIndex = 0;
+        std::array<Result, 2> m_results;
         std::map<size_t, Result> m_combineResults;
         std::pair<size_t, diff_cache::Iterator> m_prevRes;
         Data m_needle;
-        diff_cache::DiffCache m_cache;
+        diff_cache::DiffCachePtr m_cache;
 
     };
 }
