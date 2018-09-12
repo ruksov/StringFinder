@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Caches">
+      <UniqueIdentifier>{7e441efe-7874-4e24-bc4f-6cb5e7655ecb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buffers">
+      <UniqueIdentifier>{0ee38ad9-d929-4c92-9365-a4264f8f2e0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ProgressBars">
+      <UniqueIdentifier>{4f1ac073-2c74-494d-96bf-6942bb32c57a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Matchers">
+      <UniqueIdentifier>{99b182ed-7912-4e47-87e7-b89b01336be7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -24,64 +36,79 @@
     <ClInclude Include="Exceptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="INeedleCache.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SortedNeedleCache.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Matcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DoubleBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Result.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DiffCacheTypes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CacheFactory.h">
+      <Filter>Caches</Filter>
     </ClInclude>
     <ClInclude Include="DiffCache.h">
-      <Filter>Header Files</Filter>
+      <Filter>Caches</Filter>
     </ClInclude>
-    <ClInclude Include="LinearMatcher.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="DiffCacheTypes.h">
+      <Filter>Caches</Filter>
+    </ClInclude>
+    <ClInclude Include="ICache.h">
+      <Filter>Caches</Filter>
+    </ClInclude>
+    <ClInclude Include="IMatcher.h">
+      <Filter>Matchers</Filter>
+    </ClInclude>
+    <ClInclude Include="MatcherFactory.h">
+      <Filter>Matchers</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchResult.h">
+      <Filter>Matchers</Filter>
+    </ClInclude>
+    <ClInclude Include="FileReader.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="DoubleBuffer.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="IReader.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressBarCollection.h">
+      <Filter>ProgressBars</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleProgressBar.h">
+      <Filter>ProgressBars</Filter>
+    </ClInclude>
+    <ClInclude Include="ThresholdMatcher.h">
+      <Filter>Matchers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SortedNeedleCache.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Matcher.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DoubleBuffer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CacheFactory.cpp">
+      <Filter>Caches</Filter>
     </ClCompile>
     <ClCompile Include="DiffCache.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Caches</Filter>
     </ClCompile>
-    <ClCompile Include="LinearMatcher.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="IMatcher.cpp">
+      <Filter>Matchers</Filter>
+    </ClCompile>
+    <ClCompile Include="DoubleBuffer.cpp">
+      <Filter>Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="FileReader.cpp">
+      <Filter>Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleProgressBar.cpp">
+      <Filter>ProgressBars</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBarCollection.cpp">
+      <Filter>ProgressBars</Filter>
+    </ClCompile>
+    <ClCompile Include="ThresholdMatcher.cpp">
+      <Filter>Matchers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

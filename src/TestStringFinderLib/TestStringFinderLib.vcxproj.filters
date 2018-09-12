@@ -32,16 +32,13 @@
     <ClCompile Include="TestFileReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestSortedNeedleCache.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TestDoubleBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestMatcher.cpp">
+    <ClCompile Include="TestDiffCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestDiffCache.cpp">
+    <ClCompile Include="TestThresholdMatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

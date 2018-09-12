@@ -78,28 +78,28 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -147,6 +147,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnablePREfast>true</EnablePREfast>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -168,6 +169,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnablePREfast>true</EnablePREfast>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -177,29 +179,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CacheFactory.h" />
+    <ClInclude Include="MatcherFactory.h" />
+    <ClInclude Include="ThresholdMatcher.h" />
+    <ClInclude Include="ConsoleProgressBar.h" />
     <ClInclude Include="DiffCache.h" />
     <ClInclude Include="DoubleBuffer.h" />
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="FileReader.h" />
-    <ClInclude Include="INeedleCache.h" />
+    <ClInclude Include="ICache.h" />
+    <ClInclude Include="IMatcher.h" />
     <ClInclude Include="IReader.h" />
-    <ClInclude Include="LinearMatcher.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="Matcher.h" />
     <ClInclude Include="DiffCacheTypes.h" />
-    <ClInclude Include="Result.h" />
-    <ClInclude Include="SortedNeedleCache.h" />
+    <ClInclude Include="MatchResult.h" />
+    <ClInclude Include="ProgressBarCollection.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CacheFactory.cpp" />
+    <ClCompile Include="ThresholdMatcher.cpp" />
+    <ClCompile Include="ConsoleProgressBar.cpp" />
     <ClCompile Include="DiffCache.cpp" />
     <ClCompile Include="DoubleBuffer.cpp" />
     <ClCompile Include="FileReader.cpp" />
-    <ClCompile Include="LinearMatcher.cpp" />
+    <ClCompile Include="IMatcher.cpp" />
     <ClCompile Include="Log.cpp" />
-    <ClCompile Include="Matcher.cpp" />
-    <ClCompile Include="SortedNeedleCache.cpp" />
+    <ClCompile Include="ProgressBarCollection.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -1,88 +1,174 @@
 #include "stdafx.h"
 #include "DiffCache.h"
 #include "Exceptions.h"
+#include "Log.h"
 
-namespace sf::lib::diff_cache
+size_t g_cmpCount = 0;
+
+namespace sf::lib
 {
-    DiffCachePtr Create(const std::string& data)
+    DiffCache::DiffCache(Data cacheData)
+        : m_cacheData(std::move(cacheData))
     {
-        THROW_IF(data.size() > std::numeric_limits<uint32_t>::max()
-            , "Failed to create DiffCache. Input data is too big, max size is "
-            << std::numeric_limits<uint32_t>::max() << " bytes.");
+        ConstructCache();
+    }
 
-        DiffCachePtr cache = std::make_unique<DiffCache>();
+    DiffCache::~DiffCache()
+    {
+        LOG_INFO("compare count - " << g_cmpCount);
+    }
 
-        // index in for each data loop
-        uint32_t dataIndex = 0;
+    const Data & DiffCache::GetCacheData() const
+    {
+        return m_cacheData;
+    }
 
-        // index in current str with last offset value of known byte equal to parent byte
-        uint32_t currIndex = 0;
+    void DiffCache::Reset(Data cacheData)
+    {
+        m_cacheData = std::move(cacheData);
+        ConstructCache();
+    }
 
-        // index in parent str with last offset value of known byte equal to current byte 
-        uint32_t parentIndex = 0;
-
-        // iterator in diff tree, which contain node bound with prev byte in data
-        Iterator prevIt = cache->end();
-
-        const uint32_t dataSize = static_cast<uint32_t>(data.size());
-        
-        for (auto currChar : data)
+    bool DiffCache::GetFirstResult(CacheMatchResult & inOutRes, const Data & cmpData)
+    {
+        std::optional<size_t> updatedCacheOffset;
+        if (inOutRes.MatchLen != 0)
         {
-            auto it = cache->emplace(Key(currChar, 0), Value(dataIndex));
+            // find more suitable node for comparation
+            auto it = FindHighestParent(inOutRes.MatchLen, m_iteratorList.at(inOutRes.CacheOffset));
+            updatedCacheOffset = it->second.Offset;
+        }
+        else if (inOutRes.CmpDataOffset < cmpData.size())
+        {
+            auto it = m_cache.find(DiffCacheKey(0, cmpData.at(inOutRes.CmpDataOffset)));
+            if (it != m_cache.end())
+            {
+                updatedCacheOffset = it->second.Offset;
+            }
+        }
+
+        if (!updatedCacheOffset)
+        {
+            return false;
+        }
+
+        inOutRes.CacheOffset = updatedCacheOffset.value();
+        size_t addMatchLen = CompareWithCacheData(inOutRes.CacheOffset
+            , inOutRes.CmpDataOffset
+            , cmpData
+            , inOutRes.MatchLen);
+        inOutRes.MatchLen += addMatchLen;
+        return addMatchLen != 0;
+    }
+
+    bool DiffCache::GetNextResult(CacheMatchResult& inOutRes, const Data & cmpData)
+    {
+        auto prevIt = m_iteratorList.at(inOutRes.CacheOffset);
+        if (!prevIt->second.DiffRanges                                          // range from prev result has not any diff sub ranges
+            || inOutRes.CmpDataOffset + inOutRes.MatchLen >= cmpData.size())    // end of cmp data range
+        {
+            return false;
+        }
+
+        auto it = prevIt->second.DiffRanges->find(
+            DiffCacheKey(inOutRes.MatchLen
+                , cmpData.at(inOutRes.CmpDataOffset + inOutRes.MatchLen)));
+
+        if (it == prevIt->second.DiffRanges->end())
+        {
+            return false;
+        }
+
+        inOutRes.CacheOffset = it->second.Offset;
+        inOutRes.MatchLen += CompareWithCacheData(inOutRes.CacheOffset
+            , inOutRes.CmpDataOffset
+            , cmpData
+            , inOutRes.MatchLen);
+
+        return true;
+    }
+
+    void DiffCache::ConstructCache()
+    {
+        m_cache.clear();
+        m_iteratorList.clear();
+        const size_t dataSize = m_cacheData.size();
+
+        for (size_t dataOffset = 0; dataOffset < dataSize; ++dataOffset)
+        {
+            auto it = m_cache.emplace(DiffCacheKey(0, m_cacheData.at(dataOffset)), DiffCacheValue(dataOffset));
 
             while (!it.second)
             {
                 auto& parentKey = it.first->first;
                 auto& parentValue = it.first->second;
-                assert(data.at(parentValue.Offset + parentKey.DiffOffset) == parentKey.DiffChar);
+                assert(dataOffset > parentValue.Offset);
+                assert(m_cacheData.at(parentValue.Offset + parentKey.DiffOffset) == parentKey.DiffByte);
 
-                currIndex = dataIndex + parentKey.DiffOffset;
-                parentIndex = parentValue.Offset + parentKey.DiffOffset;
+                size_t childCmpOffset = dataOffset + parentKey.DiffOffset;
+                size_t parentCmpOffset = parentValue.Offset + parentKey.DiffOffset;
 
                 for (
-                    ; currIndex < dataSize && data.at(parentIndex) == data.at(currIndex)
-                    ; ++parentIndex, ++currIndex);
+                    ; childCmpOffset < dataSize 
+                    && m_cacheData.at(childCmpOffset) == m_cacheData.at(parentCmpOffset)
+                    ; ++childCmpOffset, ++parentCmpOffset);
 
-                // current str: [dataIndex] ... (currIndex)
-                // parrent str: [val.Offset] ... (parrentIndex)
-                // before start comaring these string ranges must be equal 
-                assert(data.at(parentValue.Offset) == data.at(dataIndex));
-                assert(currIndex == dataSize || data.at(parentIndex) != data.at(currIndex));
-                assert(data.substr(parentValue.Offset, parentIndex - parentValue.Offset)
-                    == data.substr(dataIndex, currIndex - dataIndex));
+                // these data ranges must be equal:
+                //
+                // child data:            [dataOffset] ... (childCmpOffset)
+                // parrent data: [parrentValue.Offset] ... (parentCmpOffset)
+                assert(m_cacheData.substr(parentValue.Offset, parentCmpOffset - parentValue.Offset)
+                    == m_cacheData.substr(dataOffset, childCmpOffset - dataOffset));
 
-                if (dataSize == currIndex)
+                if (dataSize == childCmpOffset)
                 {
-                    // save current str like full equal sub string in parrent node
-                    if (!parentValue.SubStrings)
-                    {
-                        parentValue.SubStrings = std::make_unique<OffsetList>();
-                    }
-                    parentValue.SubStrings->push_back(dataIndex);
+                    // this range is sub range of parent range
+                    // so we don't need to save it
                     break;
                 }
 
                 // try to create node in parrent diff tree
                 // with key - value of first different current str byte from parrent str 
-                if (!parentValue.DiffStrings)
+                if (!parentValue.DiffRanges)
                 {
-                    parentValue.DiffStrings = std::make_unique<DiffCache>();
+                    parentValue.DiffRanges = std::make_unique<DiffCacheContainer>();
                 }
 
-                it = parentValue.DiffStrings->emplace(Key(data.at(currIndex), currIndex - dataIndex)
-                    , Value(dataIndex));
+                it = parentValue.DiffRanges->emplace(DiffCacheKey(childCmpOffset - dataOffset, m_cacheData.at(childCmpOffset))
+                    , DiffCacheValue(dataOffset, parentValue.Offset));
             }
 
-            if (dataIndex != 0 && prevIt->second.Offset + 1 == it.first->second.Offset)
-            {
-                prevIt->second.NextDataByte = std::make_unique<Iterator>(it.first);
-            }
-
-            prevIt = it.first;
-
-            ++dataIndex;
+            // save to iterator list parrent string
+            m_iteratorList.push_back(it.first);
         }
 
-        return cache;
+        assert(m_cacheData.size() == m_iteratorList.size());
+    }
+
+    size_t DiffCache::CompareWithCacheData(size_t cacheDataOffset,
+        size_t cmpDataOffset,
+        const Data& cmpData,
+        size_t cachedMatchLen) const
+    {
+        size_t matchLen = cachedMatchLen;
+
+        for (; cacheDataOffset + matchLen < m_cacheData.size()
+            && cmpDataOffset + matchLen < cmpData.size()
+            && m_cacheData.at(cacheDataOffset + matchLen) == cmpData.at(cmpDataOffset + matchLen)
+            ; ++matchLen, ++g_cmpCount);
+
+        return matchLen - cachedMatchLen;
+    }
+
+    DiffCacheContainer::iterator& DiffCache::FindHighestParent(size_t matchLen, DiffCacheContainer::iterator & it)
+    {
+        auto parentIt = std::ref(it);
+        while (parentIt.get()->second.Offset != parentIt.get()->second.ParentOffset
+            && matchLen <= parentIt.get()->first.DiffOffset)
+        {
+            parentIt = std::ref(m_iteratorList.at(parentIt.get()->second.ParentOffset));
+        }
+        return parentIt;
     }
 }
+

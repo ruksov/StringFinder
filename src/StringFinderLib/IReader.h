@@ -18,7 +18,9 @@ namespace sf::lib
 
         virtual void Reset() = 0;
         virtual void ReadNext(Data& data) = 0;
-        virtual bool IsEnd() const noexcept = 0;
-        virtual size_t GetIndex() const noexcept = 0;
+        virtual bool IsEnd() const = 0;
+        virtual size_t GetIndex() const = 0;
+        virtual size_t GetDataCount() const = 0;
+        virtual size_t GetDataSize() const = 0;
     };
 }

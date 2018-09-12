@@ -9,25 +9,17 @@ namespace
     {
         MOCK_METHOD0(Reset, void());
         MOCK_METHOD1(ReadNext, void(Data&));
-        MOCK_CONST_METHOD0(MockIsEnd, bool());
-        MOCK_CONST_METHOD0(MockGetIndex, size_t());
-
-        bool IsEnd() const noexcept override
-        {
-            return MockIsEnd();
-        }
-
-        size_t GetIndex() const noexcept override
-        {
-            return MockGetIndex();
-        }
+        MOCK_CONST_METHOD0(IsEnd, bool());
+        MOCK_CONST_METHOD0(GetIndex, size_t());
+        MOCK_CONST_METHOD0(GetDataCount, size_t());
+        MOCK_CONST_METHOD0(GetDataSize, size_t());
     };
 }
 
 TEST(TestDoubleBuffer, EmptyReader)
 {
     auto mock = std::make_unique<MockReader>();
-    EXPECT_CALL(*mock, MockIsEnd())
+    EXPECT_CALL(*mock, IsEnd())
         .WillRepeatedly(Return(true));
 
     sf::lib::DoubleBuffer buffer(std::move(mock));
@@ -44,7 +36,7 @@ TEST(TestDoubleBuffer, EmptyReader)
 TEST(TestDoubleBuffer, OneRead)
 {
     auto mock = std::make_unique<MockReader>();
-    EXPECT_CALL(*mock, MockIsEnd())
+    EXPECT_CALL(*mock, IsEnd())
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
 
@@ -66,7 +58,7 @@ TEST(TestDoubleBuffer, OneRead)
 TEST(TestDoubleBuffer, SeveralReads)
 {
     auto mock = std::make_unique<MockReader>();
-    EXPECT_CALL(*mock, MockIsEnd())
+    EXPECT_CALL(*mock, IsEnd())
         .Times(AtLeast(3))
         .WillOnce(Return(false))
         .WillOnce(Return(false))
@@ -98,7 +90,7 @@ TEST(TestDoubleBuffer, SeveralReads)
 TEST(TestDoubleBuffer, TestReset)
 {
     auto mock = std::make_unique<MockReader>();
-    EXPECT_CALL(*mock, MockIsEnd())
+    EXPECT_CALL(*mock, IsEnd())
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(true))

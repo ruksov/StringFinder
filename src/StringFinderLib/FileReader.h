@@ -6,12 +6,14 @@ namespace sf::lib
     class FileReader : public IReader
     {
     public:
-        FileReader(std::wstring filePath, size_t dataSize);
+        FileReader(std::string filePath, size_t dataSize);
 
         void Reset() override;
         void ReadNext(Data& data) override;
         bool IsEnd() const noexcept override;
         size_t GetIndex() const noexcept override;
+        size_t GetDataCount() const noexcept override;
+        size_t GetDataSize() const noexcept override;
 
     private:
         std::ifstream m_file;

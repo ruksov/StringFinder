@@ -5,7 +5,7 @@
 
 namespace sf::lib
 {
-    FileReader::FileReader(std::wstring filePath, size_t dataSize)
+    FileReader::FileReader(std::string filePath, size_t dataSize)
         : m_dataSize(dataSize)
     {
         //
@@ -63,5 +63,15 @@ namespace sf::lib
     size_t FileReader::GetIndex() const noexcept
     {
         return m_index;
+    }
+
+    size_t FileReader::GetDataCount() const noexcept
+    {
+        return m_dataCount;
+    }
+
+    size_t FileReader::GetDataSize() const noexcept
+    {
+        return m_dataSize;
     }
 }

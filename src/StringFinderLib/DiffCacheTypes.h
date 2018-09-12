@@ -1,55 +1,64 @@
 #pragma once
-#include <functional>
+#include <vector>
+#include <unordered_map>
 #include <memory>
 
-namespace sf::lib::diff_cache
+namespace sf::lib
 {
-    struct Key
+    struct DiffCacheKey
     {
-        uint32_t DiffOffset = 0;
-        char DiffChar = 0;
+        // offset of the first different byte
+        size_t DiffOffset = 0;
 
-        Key(char diffCahr, uint32_t diffOffset) noexcept
-            : DiffChar(diffCahr)
-            , DiffOffset(diffOffset)
+        // value of the first different byte
+        char DiffByte = 0;
+
+
+        DiffCacheKey(size_t diffOffset, char diffByte) noexcept
+            : DiffOffset(diffOffset)
+            , DiffByte(diffByte)
         {
         }
 
-        bool operator==(const Key& other) const noexcept
+        bool operator==(const DiffCacheKey& other) const noexcept
         {
-            return (DiffChar == other.DiffChar
-                && DiffOffset == other.DiffOffset);
-        }
-    };
-
-    struct KeyHash
-    {
-        size_t operator()(Key const& k) const noexcept
-        {
-            const size_t h1 = std::hash<char>()(k.DiffChar);
-            const size_t h2 = std::hash<uint32_t>()(k.DiffOffset);
-            return h1 ^ (h2 << 1);
+            return (DiffOffset == other.DiffOffset && DiffByte == other.DiffByte);
         }
     };
 
-    struct Value;
-    using DiffCache = std::unordered_map<Key, Value, KeyHash>;
-
-    using Iterator = DiffCache::iterator;
-    using ConstIterator = DiffCache::const_iterator;
-    using OffsetList = std::vector<uint32_t>;
-
-    struct Value
+    struct DiffCacheKeyHash
     {
-        std::unique_ptr<DiffCache> DiffStrings;
-        std::unique_ptr<OffsetList> SubStrings;
-        std::unique_ptr<Iterator> NextDataByte;
-        uint32_t Offset;
+        size_t operator()(DiffCacheKey const& k) const noexcept
+        {
+            return k.DiffByte ^ (k.DiffOffset << 8);
+        }
+    };
 
-        explicit Value(uint32_t offset) noexcept
+    using DiffCacheContainer = std::unordered_map<DiffCacheKey, struct DiffCacheValue, DiffCacheKeyHash>;
+
+    struct DiffCacheValue
+    {
+        // offset of the first byte 
+        size_t Offset;
+
+        // parent iterator
+        // if node has not parent it is equal Offset field
+        size_t ParentOffset;
+
+        // tree of ranges, which have same begin and differents starting from some byte
+        std::unique_ptr<DiffCacheContainer> DiffRanges;
+
+        explicit DiffCacheValue(size_t offset)
             : Offset(offset)
+            , ParentOffset(offset)
         {
         }
-        //#pragma warning (suppress : 26495)
+
+        DiffCacheValue(size_t offset, size_t parentOffset)
+            : Offset(offset)
+            , ParentOffset(parentOffset)
+        {
+        }
+#pragma warning (suppress : 26495)  // always initialize ParentOffset (bug)
     };
 }

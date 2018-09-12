@@ -35,12 +35,12 @@ namespace
         {
             m_file.close();
             m_reader.reset();
-            ASSERT_EQ(0, _wremove(m_path.c_str()));
+            ASSERT_EQ(0, remove(m_path.c_str()));
         }
 
     protected:
         std::ofstream m_file;
-        std::wstring m_path = L"test.txt";
+        std::string m_path = "test.txt";
         size_t m_fileSize = 0;
         size_t m_dataSize = 0;
         std::unique_ptr<sf::lib::IReader> m_reader;
@@ -49,7 +49,7 @@ namespace
 
 TEST_F(TestFileReader, FileOpenError)
 {
-    ASSERT_THROW(m_reader.reset(new sf::lib::FileReader(L"errorPath.txt", 10)), std::runtime_error);
+    ASSERT_THROW(m_reader.reset(new sf::lib::FileReader("errorPath.txt", 10)), std::runtime_error);
 }
 
 TEST_F(TestFileReader, DataSizeEqualZero)

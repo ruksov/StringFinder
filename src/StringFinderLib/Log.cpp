@@ -3,14 +3,29 @@
 
 namespace sf::lib
 {
-    void LogThreadSafe(std::wstringstream ss)
+    namespace config
     {
-        static std::mutex m;
-        auto t = std::time(nullptr);
+        static bool g_initLog = false;
+        static std::mutex g_lock;
+    }
+
+    void InitLog()
+    {
+        config::g_initLog = true;
+    }
+
+    void LogThreadSafe(std::stringstream ss)
+    {
+        if (!config::g_initLog)
+        {
+            return;
+        }
+
+        const auto t = std::time(nullptr);
         std::tm lt;
         localtime_s(&lt, &t);
 
-        std::lock_guard lock(m);
-        std::wcout << std::put_time(&lt, L"%T ") << ss.str() << '\n';
+        std::lock_guard lock(config::g_lock);
+        std::cout << std::put_time(&lt, "%T ") << ss.str() << '\n';
     }
 }
