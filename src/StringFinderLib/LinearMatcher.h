@@ -20,14 +20,13 @@ namespace sf::lib
         std::optional<Result> MatchHaystackMiddle(size_t hsOffset, const Data& hs);
         bool MatchHaystackEnd(size_t hsOffset, const Data& hs);
 
-        void PushToResults(size_t hsIndex, size_t hsSize, const Result& res, bool isCombineResult);
+        void PushToResults(size_t hsIndex, size_t hsSize, Result& res, bool isCombineResult);
 
     private:
         size_t m_threshold;
-        bool m_resultIndex = 0;
-        std::array<Result, 2> m_results;
+        Result m_cacheRes;
+        std::ofstream m_resultLog;
         std::map<size_t, Result> m_combineResults;
-        std::pair<size_t, diff_cache::Iterator> m_prevRes;
         Data m_needle;
         diff_cache::DiffCachePtr m_cache;
 

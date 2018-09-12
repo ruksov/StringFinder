@@ -4,21 +4,40 @@
 
 namespace sf::lib::diff_cache
 {
+    struct DiffInfo
+    {
+        uint32_t Offset = 0;
+        char Byte = 0;
+
+        DiffInfo(uint32_t offset, char byte)
+            : Offset(offset)
+            , Byte(byte)
+        {
+        }
+    };
+
     struct Key
     {
-        uint32_t DiffOffset = 0;
-        char DiffChar = 0;
+        union
+        {
+            DiffInfo Info;
+            size_t CompareValue = 0;
+        };
 
-        Key(char diffCahr, uint32_t diffOffset) noexcept
-            : DiffChar(diffCahr)
-            , DiffOffset(diffOffset)
+        Key(uint32_t diffOffset, char diffByte) noexcept
+            : Info(diffOffset, diffByte)
         {
         }
 
         bool operator==(const Key& other) const noexcept
         {
-            return (DiffChar == other.DiffChar
-                && DiffOffset == other.DiffOffset);
+            return (Info.Byte == other.Info.Byte
+                && Info.Offset == other.Info.Offset);
+        }
+
+        bool operator<(const Key& other) const noexcept
+        {
+            return CompareValue < other.CompareValue;
         }
     };
 
@@ -26,8 +45,8 @@ namespace sf::lib::diff_cache
     {
         size_t operator()(Key const& k) const noexcept
         {
-            const size_t h1 = std::hash<char>()(k.DiffChar);
-            const size_t h2 = std::hash<uint32_t>()(k.DiffOffset);
+            const size_t h1 = std::hash<char>()(k.Info.Byte);
+            const size_t h2 = std::hash<uint32_t>()(k.Info.Offset);
             return h1 ^ (h2 << 1);
         }
     };

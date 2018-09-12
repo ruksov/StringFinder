@@ -26,18 +26,18 @@ namespace sf::lib::diff_cache
 
         const uint32_t dataSize = static_cast<uint32_t>(data.size());
         
-        for (auto currChar : data)
+        for (auto currByte : data)
         {
-            auto it = cache->emplace(Key(currChar, 0), Value(dataIndex));
+            auto it = cache->emplace(Key(0, currByte), Value(dataIndex));
 
             while (!it.second)
             {
                 auto& parentKey = it.first->first;
                 auto& parentValue = it.first->second;
-                assert(data.at(parentValue.Offset + parentKey.DiffOffset) == parentKey.DiffChar);
+                assert(data.at(parentValue.Offset + parentKey.Info.Offset) == parentKey.Info.Byte);
 
-                currIndex = dataIndex + parentKey.DiffOffset;
-                parentIndex = parentValue.Offset + parentKey.DiffOffset;
+                currIndex = dataIndex + parentKey.Info.Offset;
+                parentIndex = parentValue.Offset + parentKey.Info.Offset;
 
                 for (
                     ; currIndex < dataSize && data.at(parentIndex) == data.at(currIndex)
@@ -69,7 +69,7 @@ namespace sf::lib::diff_cache
                     parentValue.DiffStrings = std::make_unique<DiffCache>();
                 }
 
-                it = parentValue.DiffStrings->emplace(Key(data.at(currIndex), currIndex - dataIndex)
+                it = parentValue.DiffStrings->emplace(Key(currIndex - dataIndex, data.at(currIndex))
                     , Value(dataIndex));
             }
 

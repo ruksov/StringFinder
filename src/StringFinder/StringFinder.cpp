@@ -26,6 +26,8 @@ namespace sf
         LOG_INFO("Initialize matcher");
         m_matcher = std::make_unique<lib::LinearMatcher>(threshold, std::move(needlePath));
         LOG_INFO("Finish initialize matcher");;
+        
+        std::cin.get();
 
         LOG_INFO("Initialize reader for haystack buffer");
         auto haystackReader = std::make_unique<lib::FileReader>(std::move(haystackPath), needleSize);

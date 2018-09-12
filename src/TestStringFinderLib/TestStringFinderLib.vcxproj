@@ -156,7 +156,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)StringFinderLib;$(SolutionDir)3rd_party\googletest\googletest;$(SolutionDir)3rd_party\googletest\googlemock;$(SolutionDir)3rd_party\googletest\googletest\include;$(SolutionDir)3rd_party\googletest\googlemock\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnablePREfast>false</EnablePREfast>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -180,7 +180,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)StringFinderLib;$(SolutionDir)3rd_party\googletest\googletest;$(SolutionDir)3rd_party\googletest\googlemock;$(SolutionDir)3rd_party\googletest\googletest\include;$(SolutionDir)3rd_party\googletest\googlemock\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnablePREfast>false</EnablePREfast>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
