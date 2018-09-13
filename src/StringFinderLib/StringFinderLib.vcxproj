@@ -78,28 +78,28 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>StringFinderLib.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>StringFinderLib.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>StringFinderLib.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)..\lib\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)..\obj\$(PlatformShortName)\$(Configuration)\$(ProjectName)\</IntDir>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>StringFinderLib.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -178,6 +178,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DiffCache.h" />
+    <ClInclude Include="DiffCacheWrapper.h" />
     <ClInclude Include="DoubleBuffer.h" />
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="FileReader.h" />
@@ -194,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DiffCache.cpp" />
+    <ClCompile Include="DiffCacheWrapper.cpp" />
     <ClCompile Include="DoubleBuffer.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="LinearMatcher.cpp" />
@@ -206,6 +208,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="StringFinderLib.ruleset" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

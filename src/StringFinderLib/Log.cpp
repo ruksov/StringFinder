@@ -6,7 +6,7 @@ namespace sf::lib
     void LogThreadSafe(std::wstringstream ss)
     {
         static std::mutex m;
-        auto t = std::time(nullptr);
+        const auto t = std::time(nullptr);
         std::tm lt;
         localtime_s(&lt, &t);
 

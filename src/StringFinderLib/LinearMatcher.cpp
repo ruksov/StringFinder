@@ -14,11 +14,12 @@ namespace sf::lib
         file.open(filePath, std::ios::in | std::ios::binary);
 
         m_resultLog.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        m_resultLog.open("results.log", std::ios::out);
+        m_resultLog.open("result.log", std::ios::out);
 
         m_needle.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-        m_cache = diff_cache::Create(m_needle);
+        diff_cache::IteratorList itList;
+        m_cache = diff_cache::Create(m_needle, itList);
     }
 
     size_t LinearMatcher::Match(size_t hsIndex, size_t hsOffset, const Data & hs)

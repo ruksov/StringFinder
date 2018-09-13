@@ -1,5 +1,6 @@
 #pragma once
-#include <functional>
+#include <vector>
+#include <map>
 #include <memory>
 
 namespace sf::lib::diff_cache
@@ -9,7 +10,7 @@ namespace sf::lib::diff_cache
         uint32_t Offset = 0;
         char Byte = 0;
 
-        DiffInfo(uint32_t offset, char byte)
+        DiffInfo(uint32_t offset, char byte) noexcept
             : Offset(offset)
             , Byte(byte)
         {
@@ -53,7 +54,6 @@ namespace sf::lib::diff_cache
 
     struct Value;
     using DiffCache = std::unordered_map<Key, Value, KeyHash>;
-
     using Iterator = DiffCache::iterator;
     using ConstIterator = DiffCache::const_iterator;
     using OffsetList = std::vector<uint32_t>;
@@ -62,13 +62,12 @@ namespace sf::lib::diff_cache
     {
         std::unique_ptr<DiffCache> DiffStrings;
         std::unique_ptr<OffsetList> SubStrings;
-        std::unique_ptr<Iterator> NextDataByte;
-        uint32_t Offset;
+        uint32_t Offset = 0;
 
         explicit Value(uint32_t offset) noexcept
             : Offset(offset)
         {
         }
-        //#pragma warning (suppress : 26495)
+#pragma warning (suppress : 26495)
     };
 }

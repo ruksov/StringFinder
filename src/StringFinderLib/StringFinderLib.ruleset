@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Rules for StringFinderLib" Description="Code analysis rules for StringFinderLib.vcxproj." ToolsVersion="15.0">
+  <IncludeAll Action="Warning" />
+  <Rules AnalyzerId="Microsoft.Analyzers.NativeCodeAnalysis" RuleNamespace="Microsoft.Rules.Native">
+    <Rule Id="C26472" Action="None" />
+    <Rule Id="C26489" Action="None" />
+  </Rules>
+</RuleSet>

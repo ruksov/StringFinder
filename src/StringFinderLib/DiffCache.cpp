@@ -1,15 +1,17 @@
 #include "stdafx.h"
 #include "DiffCache.h"
 #include "Exceptions.h"
+#include "Log.h"
 
 namespace sf::lib::diff_cache
 {
-    DiffCachePtr Create(const std::string& data)
+    DiffCachePtr Create(const Data& data, IteratorList& iteratorList)
     {
         THROW_IF(data.size() > std::numeric_limits<uint32_t>::max()
             , "Failed to create DiffCache. Input data is too big, max size is "
             << std::numeric_limits<uint32_t>::max() << " bytes.");
 
+        iteratorList.clear();
         DiffCachePtr cache = std::make_unique<DiffCache>();
 
         // index in for each data loop
@@ -21,9 +23,6 @@ namespace sf::lib::diff_cache
         // index in parent str with last offset value of known byte equal to current byte 
         uint32_t parentIndex = 0;
 
-        // iterator in diff tree, which contain node bound with prev byte in data
-        Iterator prevIt = cache->end();
-
         const uint32_t dataSize = static_cast<uint32_t>(data.size());
         
         for (auto currByte : data)
@@ -34,10 +33,11 @@ namespace sf::lib::diff_cache
             {
                 auto& parentKey = it.first->first;
                 auto& parentValue = it.first->second;
-                assert(data.at(parentValue.Offset + parentKey.Info.Offset) == parentKey.Info.Byte);
+                assert(data.at(static_cast<size_t>(parentValue.Offset) + parentKey.Info.Offset) == parentKey.Info.Byte);
 
                 currIndex = dataIndex + parentKey.Info.Offset;
                 parentIndex = parentValue.Offset + parentKey.Info.Offset;
+                assert(currIndex > parentIndex);
 
                 for (
                     ; currIndex < dataSize && data.at(parentIndex) == data.at(currIndex)
@@ -59,6 +59,7 @@ namespace sf::lib::diff_cache
                         parentValue.SubStrings = std::make_unique<OffsetList>();
                     }
                     parentValue.SubStrings->push_back(dataIndex);
+                    assert(std::is_sorted(parentValue.SubStrings->begin(), parentValue.SubStrings->end()));
                     break;
                 }
 
@@ -73,16 +74,13 @@ namespace sf::lib::diff_cache
                     , Value(dataIndex));
             }
 
-            if (dataIndex != 0 && prevIt->second.Offset + 1 == it.first->second.Offset)
-            {
-                prevIt->second.NextDataByte = std::make_unique<Iterator>(it.first);
-            }
-
-            prevIt = it.first;
+            // save to iterator list parrent string
+            iteratorList.push_back(it.first);
 
             ++dataIndex;
         }
 
+        assert(cache->size() == iteratorList.size());
         return cache;
     }
 }
