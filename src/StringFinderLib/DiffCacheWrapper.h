@@ -23,6 +23,8 @@ namespace sf::lib
         // Return offsets of strings which equal to parrent string but less than it
         const diff_cache::OffsetList& GetSubStrings(uint32_t offset) const;
 
+        const size_t GetCacheDataSize() const noexcept;
+
     private:
         size_t CompareData(size_t lOffset, const Data & lData, size_t rOffset, const Data & rData) const;
 

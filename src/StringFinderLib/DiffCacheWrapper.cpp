@@ -54,13 +54,11 @@ namespace sf::lib
     {
         THROW_IF(dataOffset >= data.size(), "Wrong imput parameter for data [dataOffset=" << dataOffset << "]");
 
-        THROW_IF(static_cast<size_t>(dataOffset) + diffOffset >= m_cacheData.size(),
-            "Wrong input parameters for data [dataOffset=" << dataOffset
-            << "] [diffOffset=" << diffOffset << "]");
-
-        THROW_IF(static_cast<size_t>(cacheOffset) + diffOffset >= m_cacheData.size(),
-            "Wrong input parameters for cache data [cacheOffset=" << cacheOffset
-            << "] [diffOffset=" << diffOffset << "]");
+        if (static_cast<size_t>(dataOffset) + diffOffset >= m_cacheData.size()
+            || static_cast<size_t>(cacheOffset) + diffOffset >= m_cacheData.size())
+        {
+            return std::nullopt;
+        }
 
         const auto it = m_iteratorList.at(cacheOffset);
 
@@ -117,6 +115,11 @@ namespace sf::lib
 
 #pragma warning (suppress : 26487)
         return it->second.SubStrings ? *it->second.SubStrings : m_emptyOffsetList;
+    }
+
+    const size_t DiffCacheWrapper::GetCacheDataSize() const noexcept
+    {
+        return m_cacheData.size();
     }
 
     size_t DiffCacheWrapper::CompareData(size_t lOffset, const Data & lData, size_t rOffset, const Data & rData) const

@@ -1,11 +1,9 @@
 #pragma once
 #include "Result.h"
-#include "DiffCache.h"
+#include "DiffCacheWrapper.h"
 
 namespace sf::lib
 {
-    using Data = std::string;
-
     class LinearMatcher
     {
     public:
@@ -14,8 +12,6 @@ namespace sf::lib
         size_t Match(size_t hsIndex, size_t hsOffset, const Data& hs);
 
     private:
-        size_t CompareData(size_t nlOffset, size_t hsOffset, const Data& hs);
-
         std::optional<Result> MatchHaystackBegin(const Data& hs);
         std::optional<Result> MatchHaystackMiddle(size_t hsOffset, const Data& hs);
         bool MatchHaystackEnd(size_t hsOffset, const Data& hs);
@@ -27,9 +23,7 @@ namespace sf::lib
         Result m_cacheRes;
         std::ofstream m_resultLog;
         std::map<size_t, Result> m_combineResults;
-        Data m_needle;
-        diff_cache::DiffCachePtr m_cache;
-
+        std::unique_ptr<DiffCacheWrapper> m_cache;
     };
 }
 

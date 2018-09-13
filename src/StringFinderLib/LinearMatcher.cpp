@@ -8,18 +8,10 @@ namespace sf::lib
 
     LinearMatcher::LinearMatcher(size_t threshold, std::wstring filePath)
         : m_threshold(threshold)
+        , m_cache(std::make_unique<DiffCacheWrapper>(std::move(filePath)))
     {
-        std::ifstream file;
-        file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-        file.open(filePath, std::ios::in | std::ios::binary);
-
         m_resultLog.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         m_resultLog.open("result.log", std::ios::out);
-
-        m_needle.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-
-        diff_cache::IteratorList itList;
-        m_cache = diff_cache::Create(m_needle, itList);
     }
 
     size_t LinearMatcher::Match(size_t hsIndex, size_t hsOffset, const Data & hs)
@@ -59,169 +51,112 @@ namespace sf::lib
         return res.value().MatchLen;
     }
 
-    size_t LinearMatcher::CompareData(size_t nlOffset, size_t hsOffset, const Data & hs)
-    {
-        size_t matchLen = 0;
-        const size_t nlSize = m_needle.size();
-        const size_t hsSize = hs.size();
-
-        for (; nlOffset + matchLen < nlSize && hsOffset + matchLen < hsSize
-            && hs.at(hsOffset + matchLen) == m_needle.at(nlOffset + matchLen);
-            ++matchLen);
-
-        return matchLen;
-    }
-
     std::optional<Result> LinearMatcher::MatchHaystackBegin(const Data & hs)
     {
         Result maxRes;
-        auto it = m_cache->find(diff_cache::Key(0, hs.at(0)));
-        auto cache = std::ref(m_cache);
+        auto res = m_cache->CompareFirst(0, hs);
 
-        size_t matchLen = 0;
-
-        while (it != cache.get()->end())
+        for (;;)
         {
-            Result res;
-
-            matchLen += CompareData(it->second.Offset + matchLen, matchLen, hs);
-            res.MatchLen = matchLen;
-            res.NlOffset = it->second.Offset;
-
-            auto combIt = m_combineResults.find(it->second.Offset);
-            if (combIt != m_combineResults.end())
+            if (!res)
             {
-                res = combIt->second;
-                res.MatchLen += matchLen;
+                break;
             }
 
-            if (res.MatchLen >= m_threshold && res.MatchLen > maxRes.MatchLen)
+
+            if (res->MatchLen > maxRes.MatchLen)
             {
-                maxRes = res;
+                maxRes = *res;
             }
 
-            if (it->second.SubStrings)
+            // try find first part in previous results
+            auto& subStrings = m_cache->GetSubStrings(res->NlOffset);
+            for (auto subOffset : subStrings)
             {
-                for (auto subStrOffset : *it->second.SubStrings)
+                auto combIt = m_combineResults.find(subOffset);
+                if (combIt != m_combineResults.end()
+                    && combIt->second.MatchLen + m_cache->GetCacheDataSize() - subOffset >= maxRes.MatchLen)
                 {
-                    combIt = m_combineResults.find(subStrOffset);
-                    if (combIt == m_combineResults.end())
-                    {
-                        continue;
-                    }
-
-                    res = combIt->second;
-                    const size_t bytesToEnd = m_needle.size() - subStrOffset;
-                    const size_t fixedMatchLen = matchLen < bytesToEnd ? matchLen : bytesToEnd;
-                    res.MatchLen += fixedMatchLen;
-
-                    if (res.MatchLen >= m_threshold && res.MatchLen > maxRes.MatchLen)
-                    {
-                        maxRes = res;
-                    }
+                    maxRes = combIt->second;
+                    maxRes.MatchLen += res->MatchLen;
                 }
             }
 
-            if (matchLen == hs.size())
+            auto combIt = m_combineResults.find(res->NlOffset);
+            if (combIt != m_combineResults.end()
+                && combIt->second.MatchLen + res->MatchLen >= maxRes.MatchLen)
             {
-                break;
+                maxRes = combIt->second;
+                maxRes.MatchLen += res->MatchLen;
             }
 
-            if (!it->second.DiffStrings)
-            {
-                break;
-            }
-
-            cache = std::ref(it->second.DiffStrings);
-            it = cache.get()->find(diff_cache::Key(static_cast<uint32_t>(matchLen)
-                , hs.at(matchLen)));
+            res = m_cache->CompareNext(res->NlOffset, res->MatchLen, 0, hs);
         }
-
+        
         m_combineResults.clear();
-        return maxRes.MatchLen == 0 ? std::nullopt : std::make_optional(maxRes);
+        if (maxRes.MatchLen < m_threshold)
+        {
+            return std::nullopt;
+        }
+        return maxRes;
     }
 
     std::optional<Result> LinearMatcher::MatchHaystackMiddle(size_t hsOffset, const Data & hs)
     {
-        Result res;
-        auto it = m_cache->find(diff_cache::Key(0, hs.at(hsOffset)));
-        auto cache = std::ref(m_cache);
-        size_t matchLen = 0;
+        Result maxRes;
+        auto res = m_cache->CompareFirst(hsOffset, hs);
 
-        while (it != cache.get()->end())
+        for (;;)
         {
-            matchLen += CompareData(it->second.Offset + matchLen, hsOffset + matchLen, hs);
-
-            if (matchLen >= m_threshold && matchLen > res.MatchLen)
-            {
-                res.HsOffset = hsOffset;
-                res.NlOffset = it->second.Offset;
-                res.MatchLen = matchLen;
-            }
-
-            if (matchLen == hs.size())
+            if (!res)
             {
                 break;
             }
 
-            if (!it->second.DiffStrings)
-            {
-                // no more strings in diff tree
-                break;
-            }
-
-            cache = std::ref(it->second.DiffStrings);
-            it = cache.get()->find(diff_cache::Key(static_cast<uint32_t>(matchLen)
-                , hs.at(matchLen)));
+            maxRes = *res;
+            res = m_cache->CompareNext(res->NlOffset, res->MatchLen, hsOffset, hs);
         }
 
-        return res.MatchLen == 0 ? std::nullopt : std::make_optional(res);
+        if (maxRes.MatchLen < m_threshold)
+        {
+            return std::nullopt;
+        }
+        return maxRes;
     }
 
     bool LinearMatcher::MatchHaystackEnd(size_t hsOffset, const Data & hs)
     {
         assert(m_combineResults.empty());
         assert(hs.size() - hsOffset < m_threshold);
-        auto it = m_cache->find(diff_cache::Key(0, hs.at(hsOffset)));
-        auto cache = std::ref(m_cache);
-        size_t matchLen = 0;
 
-        while (it != cache.get()->end())
+        auto res = m_cache->CompareFirst(hsOffset, hs);
+
+        for (;;)
         {
-            matchLen += CompareData(it->second.Offset + matchLen, hsOffset + matchLen, hs);
-
-            if (hs.size() == hsOffset + matchLen)
+            if (!res)
             {
-                m_combineResults.emplace(it->second.Offset + matchLen
-                    , Result(hsOffset, it->second.Offset, matchLen));
+                break;
+            }
 
-                if (it->second.SubStrings)
+            if (hsOffset + res->MatchLen == hs.size())
+            {
+                m_combineResults.emplace(res->NlOffset + res->MatchLen, *res);
+
+                auto& subStrings = m_cache->GetSubStrings(res->NlOffset);
+                auto subStringsEnd = std::upper_bound(subStrings.begin(),
+                    subStrings.end(),
+                    m_cache->GetCacheDataSize() - res->MatchLen);
+
+                for (auto subOffsetIt = subStrings.begin(); subOffsetIt != subStringsEnd; ++subOffsetIt)
                 {
-                    auto subOffsetEnd = std::lower_bound(it->second.SubStrings->begin()
-                        , it->second.SubStrings->end()
-                        , m_needle.size() - matchLen);
-
-                    for (auto subOffsetIt = it->second.SubStrings->begin()
-                        ; subOffsetIt != subOffsetEnd
-                        ; ++subOffsetIt)
-                    {
-                        m_combineResults.emplace(*subOffsetIt + matchLen
-                            , Result(hsOffset, *subOffsetIt, matchLen));
-                    }
+                    m_combineResults.emplace(*subOffsetIt + res->MatchLen,
+                        Result(res->HsOffset, *subOffsetIt, res->MatchLen));
                 }
 
                 break;
             }
 
-            if (!it->second.DiffStrings)
-            {
-                // no more strings in diff tree
-                break;
-            }
-
-            cache = std::ref(it->second.DiffStrings);
-            it = cache.get()->find(diff_cache::Key(static_cast<uint32_t>(matchLen)
-                , hs.at(matchLen)));
+            res = m_cache->CompareNext(res->NlOffset, res->MatchLen, hsOffset, hs);
         }
 
         return !m_combineResults.empty();
@@ -239,7 +174,7 @@ namespace sf::lib
 
         if (m_cacheRes.MatchLen != 0
             && m_cacheRes.NlOffset + m_cacheRes.MatchLen == res.NlOffset
-            && m_cacheRes.HsOffset > m_needle.size() * (hsIndex - 1))
+            && m_cacheRes.HsOffset > m_cache->GetCacheDataSize() * (hsIndex - 1))
         {
             assert(hsIndex != 0);
             res.MatchLen += m_cacheRes.MatchLen;
@@ -262,7 +197,7 @@ namespace sf::lib
                     << ", needle offset " << m_cacheRes.NlOffset << '\n';
             }
             
-            res.HsOffset += m_needle.size() * (hsIndex - (isCombineResult ? 1 : 0));
+            res.HsOffset += m_cache->GetCacheDataSize() * (hsIndex - (isCombineResult ? 1 : 0));
             
             LOG_DEBUG("Found new match result:\n"
                 << "\tHsOffset = " << res.HsOffset << '\n'
