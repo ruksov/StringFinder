@@ -6,6 +6,9 @@
 #include "Exceptions.h"
 #include "Log.h"
 
+#include "ProgressBarCollection.h"
+#include "ConsoleProgressBar.h"
+
 namespace sf
 {
     void StringFinder::Run(size_t threshold, std::wstring needlePath, std::wstring haystackPath)
@@ -20,9 +23,6 @@ namespace sf
             needleSize = file.tellg();
         }
 
-        //LOG_INFO("Initialize needle cache");
-        //auto needleCache = std::make_unique<lib::SortedNeedleCache>(std::move(needlePath));
-
         LOG_INFO("Initialize matcher");
         m_matcher = std::make_unique<lib::LinearMatcher>(threshold, std::move(needlePath));
         LOG_INFO("Finish initialize matcher");;
@@ -33,6 +33,9 @@ namespace sf
         LOG_INFO("Initialize haystack buffer");
         m_haystack = std::make_unique<lib::DoubleBuffer>(std::move(haystackReader));
 
+        lib::ProgressBarCollection progressView(m_haystack->GetDataCount());
+        progressView.AddCallback("console", lib::ConsoleProgressBar);
+        
         LOG_INFO("String Finder start search")
         auto hsData = m_haystack->GetNext();
         while (!hsData.get().empty())
@@ -44,32 +47,9 @@ namespace sf
                 i += m_matcher->Match(m_haystack->GetIndex(), i, hsData);
             }
 
+            progressView.OnProgressChange(m_haystack->GetIndex());
             hsData = m_haystack->GetNext();
         }
         LOG_INFO("String Finder finished search");
-    }
-
-    void StringFinder::PrintResults() const
-    {
-        //THROW_IF(!m_matcher, "Before you print the result, you need to start the search");
-        //std::wstringstream st;
-        //st << "Results: ";
-        //
-        //auto& results = m_matcher->GetResults();
-        //if (results.empty())
-        //{
-        //    st << "empty";
-        //    LOG_INFO(st.str());
-        //    return;
-        //}
-
-        //st << '\n';
-        //for (auto& res : results)
-        //{
-        //    st << "\tsequence of length = " << res.MatchLen
-        //        << " found at haystack offset " << res.HsOffset
-        //        << ", needle offset " << res.NlOffset << '\n';
-        //}
-        //LOG_INFO(st.str());
     }
 }

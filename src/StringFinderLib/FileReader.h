@@ -12,6 +12,7 @@ namespace sf::lib
         void ReadNext(Data& data) override;
         bool IsEnd() const noexcept override;
         size_t GetIndex() const noexcept override;
+        size_t GetDataCount() const noexcept override;
 
     private:
         std::ifstream m_file;

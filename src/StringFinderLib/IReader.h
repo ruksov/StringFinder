@@ -20,5 +20,6 @@ namespace sf::lib
         virtual void ReadNext(Data& data) = 0;
         virtual bool IsEnd() const noexcept = 0;
         virtual size_t GetIndex() const noexcept = 0;
+        virtual size_t GetDataCount() const noexcept = 0;
     };
 }

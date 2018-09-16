@@ -55,6 +55,11 @@ namespace sf::lib
         return m_index;
     }
 
+    size_t DoubleBuffer::GetDataCount() const noexcept
+    {
+        return m_reader->GetDataCount();
+    }
+
     std::future<void> DoubleBuffer::LaunchReadThread()
     {
         return std::async(std::launch::async,

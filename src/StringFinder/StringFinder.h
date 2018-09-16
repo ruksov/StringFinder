@@ -9,7 +9,6 @@ namespace sf
     {
     public:
         void Run(size_t threshold, std::wstring needlePath, std::wstring haystackPath);
-        void PrintResults() const;
 
     private:
         std::unique_ptr<lib::LinearMatcher> m_matcher;
