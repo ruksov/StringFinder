@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "StringFinder.h"
 
-#include "SortedNeedleCache.h"
 #include "FileReader.h"
 #include "Exceptions.h"
 #include "Log.h"
@@ -11,7 +10,7 @@
 
 namespace sf
 {
-    void StringFinder::Run(size_t threshold, std::wstring needlePath, std::wstring haystackPath)
+    void StringFinder::Run(uint32_t threshold, std::wstring needlePath, std::wstring haystackPath)
     {
         LOG_INFO("Run String Finder");
         // Compute needle size
@@ -44,7 +43,11 @@ namespace sf
             const auto hsDataSize = hsData.get().size();
             for (size_t i = 0; i < hsDataSize; ++i)
             {
-                i += m_matcher->Match(m_haystack->GetIndex(), i, hsData);
+                size_t matchLen = m_matcher->Match(m_haystack->GetIndex(), i, hsData);
+                if (matchLen != 0)
+                {
+                    i += matchLen - 1;
+                }
             }
 
             progressView.OnProgressChange(m_haystack->GetIndex());

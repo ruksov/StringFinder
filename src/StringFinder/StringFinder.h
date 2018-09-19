@@ -1,6 +1,5 @@
 #pragma once
 #include "DoubleBuffer.h"
-#include "Matcher.h"
 #include "LinearMatcher.h"
 
 namespace sf
@@ -8,7 +7,7 @@ namespace sf
     class StringFinder
     {
     public:
-        void Run(size_t threshold, std::wstring needlePath, std::wstring haystackPath);
+        void Run(uint32_t threshold, std::wstring needlePath, std::wstring haystackPath);
 
     private:
         std::unique_ptr<lib::LinearMatcher> m_matcher;

@@ -69,25 +69,22 @@ namespace sf::lib
                 maxRes = *res;
             }
 
-            // try find first part in previous results
-            auto& subStrings = m_cache->GetSubStrings(res->NlOffset);
-            for (auto subOffset : subStrings)
+            auto resFromPrevHsData = FindResFromPrevHsData(res->NlOffset);
+            if (resFromPrevHsData)
             {
-                auto combIt = m_combineResults.find(subOffset);
-                if (combIt != m_combineResults.end()
-                    && combIt->second.MatchLen + m_cache->GetCacheDataSize() - subOffset >= maxRes.MatchLen)
-                {
-                    maxRes = combIt->second;
-                    maxRes.MatchLen += res->MatchLen;
-                }
+                maxRes = *resFromPrevHsData;
+                maxRes.MatchLen += res->MatchLen;
             }
 
-            auto combIt = m_combineResults.find(res->NlOffset);
-            if (combIt != m_combineResults.end()
-                && combIt->second.MatchLen + res->MatchLen >= maxRes.MatchLen)
+            if (res->NlOffset < m_cache->GetCacheDataSize() - 1
+                && res->MatchLen > 1)
             {
-                maxRes = combIt->second;
-                maxRes.MatchLen += res->MatchLen;
+                m_optimizedRes.NlOffset = res->NlOffset + 1;
+                m_optimizedRes.MatchLen = res->MatchLen - 1;
+            }
+            else
+            {
+                m_optimizedRes.MatchLen = 0;
             }
 
             res = m_cache->CompareNext(res->NlOffset, res->MatchLen, 0, hs);
@@ -96,15 +93,43 @@ namespace sf::lib
         m_combineResults.clear();
         if (maxRes.MatchLen < m_threshold)
         {
+            if (m_optimizedRes.MatchLen != 0)
+            {
+                LOG_DEBUG("Save result of comparing to optimize next iteration."
+                    << "\n match length = " << m_optimizedRes.MatchLen
+                    << "\n next nl offset = " << m_optimizedRes.NlOffset);
+            }
             return std::nullopt;
         }
+
+        m_optimizedRes.MatchLen = 0;
         return maxRes;
     }
 
     std::optional<Result> LinearMatcher::MatchHaystackMiddle(size_t hsOffset, const Data & hs)
     {
         Result maxRes;
-        auto res = m_cache->CompareFirst(hsOffset, hs);
+        std::optional<Result> res;
+        if (m_optimizedRes.MatchLen != 0)
+        {
+            LOG_DEBUG("Apply optimization, search next compare data with arguments."
+                << "\n cache offset = " << m_optimizedRes.NlOffset
+                << "\n match length = " << m_optimizedRes.MatchLen);
+            res = m_cache->CompareNext(m_optimizedRes.NlOffset
+                , m_optimizedRes.MatchLen
+                , hsOffset
+                , hs);
+
+            if (!res)
+            {
+                m_optimizedRes.MatchLen -= 1;
+                m_optimizedRes.NlOffset += 1;
+            }
+        }
+        else
+        {
+            res = m_cache->CompareFirst(hsOffset, hs);
+        }
 
         for (;;)
         {
@@ -117,11 +142,31 @@ namespace sf::lib
             res = m_cache->CompareNext(res->NlOffset, res->MatchLen, hsOffset, hs);
         }
 
+        if (maxRes.NlOffset < m_cache->GetCacheDataSize() - 1
+            && maxRes.MatchLen > 1)
+        {
+            m_optimizedRes.NlOffset = maxRes.NlOffset + 1;
+            m_optimizedRes.MatchLen = maxRes.MatchLen - 1;
+        }
+        else
+        {
+            m_optimizedRes.MatchLen = 0;
+        }
+
         if (maxRes.MatchLen < m_threshold)
         {
+            if (m_optimizedRes.MatchLen != 0)
+            {
+                LOG_DEBUG("Save result of comparing to optimize next iteration."
+                    << "\n match length = " << m_optimizedRes.MatchLen
+                    << "\n next nl offset = " << m_optimizedRes.NlOffset);
+            }
             return std::nullopt;
         }
+
+        m_optimizedRes.MatchLen = 0;
         return maxRes;
+#pragma warning (suppress : 26487)
     }
 
     bool LinearMatcher::MatchHaystackEnd(size_t hsOffset, const Data & hs)
@@ -129,7 +174,27 @@ namespace sf::lib
         assert(m_combineResults.empty());
         assert(hs.size() - hsOffset < m_threshold);
 
-        auto res = m_cache->CompareFirst(hsOffset, hs);
+        std::optional<Result> res;
+        if (m_optimizedRes.MatchLen != 0)
+        {
+            LOG_DEBUG("Apply optimization, search next compare data with arguments."
+                << "\n cache offset = " << m_optimizedRes.NlOffset
+                << "\n match length = " << m_optimizedRes.MatchLen);
+            res = m_cache->CompareNext(m_optimizedRes.NlOffset
+                , m_optimizedRes.MatchLen
+                , hsOffset
+                , hs);
+
+            if (!res)
+            {
+                m_optimizedRes.MatchLen -= 1;
+                m_optimizedRes.NlOffset += 1;
+            }
+        }
+        else
+        {
+            res = m_cache->CompareFirst(hsOffset, hs);
+        }
 
         for (;;)
         {
@@ -140,26 +205,88 @@ namespace sf::lib
 
             if (hsOffset + res->MatchLen == hs.size())
             {
+                // we find range data, which can be continue in next chunck of haystack data
                 m_combineResults.emplace(res->NlOffset + res->MatchLen, *res);
 
-                auto& subStrings = m_cache->GetSubStrings(res->NlOffset);
-                auto subStringsEnd = std::upper_bound(subStrings.begin(),
-                    subStrings.end(),
-                    m_cache->GetCacheDataSize() - res->MatchLen);
+                assert(res->MatchLen < m_threshold);
 
+                // get offsets of ranges, which equeal found range in cache
+                // [sub range offset] ... [cache end] == [found range offset] ... [found range offset + sub range length]
+                // and clip this list
+                auto& subStrings = m_cache->GetSubStrings(res->NlOffset);               
+                const auto subStringsEnd = std::upper_bound(subStrings.begin(),
+                    subStrings.end(),
+                    m_cache->GetCacheDataSize() - m_threshold);
+
+#pragma warning (suppress : 26486)
                 for (auto subOffsetIt = subStrings.begin(); subOffsetIt != subStringsEnd; ++subOffsetIt)
                 {
                     m_combineResults.emplace(*subOffsetIt + res->MatchLen,
                         Result(res->HsOffset, *subOffsetIt, res->MatchLen));
                 }
 
+                m_optimizedRes.MatchLen = 0;
                 break;
+            }
+
+            if (res->NlOffset < m_cache->GetCacheDataSize() - 1
+                && res->MatchLen > 1)
+            {
+                m_optimizedRes.NlOffset = res->NlOffset + 1;
+                m_optimizedRes.MatchLen = res->MatchLen - 1;
+            }
+            else
+            {
+                m_optimizedRes.MatchLen = 0;
             }
 
             res = m_cache->CompareNext(res->NlOffset, res->MatchLen, hsOffset, hs);
         }
 
         return !m_combineResults.empty();
+    }
+
+    std::optional<Result> LinearMatcher::FindResFromPrevHsData(uint32_t nlOffset)
+    {
+        auto& subRanges = m_cache->GetSubStrings(nlOffset);
+
+        if (m_combineResults.empty()
+            || nlOffset > m_combineResults.begin()->first
+            || (!subRanges.empty()
+                && *subRanges.begin() > m_combineResults.begin()->first))
+        {
+            return std::nullopt;
+        }
+
+        auto firstPart = m_combineResults.find(nlOffset);
+        if (firstPart != m_combineResults.end())
+        {
+            return firstPart->second;
+        }
+        else
+        {
+            const auto srEnd = std::upper_bound(subRanges.begin()
+                , subRanges.end()
+                , m_cache->GetCacheDataSize() - m_threshold - 1);
+
+            for (auto srIt = subRanges.begin(); srIt != srEnd; ++srIt)
+            {
+                firstPart = m_combineResults.find(*srIt);
+                if (firstPart != m_combineResults.end())
+                {
+                    // Found frist part of combine result
+                    LOG_DEBUG("Found first part of result from previous haystack data chunck,"
+                        << " which can be summ with current result"
+                        << "\n\t first part haystack offset = " << firstPart->second.HsOffset
+                        << "\n\t first part needle offset = " << firstPart->second.NlOffset
+                        << "\n\t first part match length = " << firstPart->second.MatchLen);
+
+                    return firstPart->second;
+                }
+            }
+        }
+
+        return std::nullopt;
     }
 
     void LinearMatcher::PushToResults(size_t hsIndex, size_t hsSize, Result& res, bool isCombineResult)
@@ -180,7 +307,6 @@ namespace sf::lib
             res.MatchLen += m_cacheRes.MatchLen;
             res.HsOffset = m_cacheRes.HsOffset;
             res.NlOffset = m_cacheRes.NlOffset;
-            assert(res.NlOffset + res.MatchLen < m_needle.size());
 
             LOG_DEBUG("Found match result wich is continue of previous.\n"
                 << "Fixed match result:\n"

@@ -80,7 +80,7 @@ namespace sf::lib::diff_cache
             ++dataIndex;
         }
 
-        assert(cache->size() == iteratorList.size());
+        assert(data.size() == iteratorList.size());
         return cache;
     }
 }

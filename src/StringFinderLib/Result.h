@@ -5,13 +5,13 @@ namespace sf::lib
 {
     struct Result
     {
-        size_t HsOffset = 0;
-        size_t NlOffset = 0;
-        size_t MatchLen = 0;
+        uint32_t HsOffset = 0;
+        uint32_t NlOffset = 0;
+        uint32_t MatchLen = 0;
 
         Result() = default;
 
-        Result(size_t hsOffset, size_t nlOffset, size_t matchLen) noexcept
+        Result(uint32_t hsOffset, uint32_t nlOffset, uint32_t matchLen) noexcept
             : HsOffset(hsOffset)
             , NlOffset(nlOffset)
             , MatchLen(matchLen)

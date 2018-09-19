@@ -147,6 +147,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnablePREfast>true</EnablePREfast>
       <TreatWarningAsError>false</TreatWarningAsError>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -168,6 +169,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnablePREfast>true</EnablePREfast>
       <TreatWarningAsError>false</TreatWarningAsError>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -183,15 +185,12 @@
     <ClInclude Include="DoubleBuffer.h" />
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="FileReader.h" />
-    <ClInclude Include="INeedleCache.h" />
     <ClInclude Include="IReader.h" />
     <ClInclude Include="LinearMatcher.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="Matcher.h" />
     <ClInclude Include="DiffCacheTypes.h" />
     <ClInclude Include="ProgressBarCollection.h" />
     <ClInclude Include="Result.h" />
-    <ClInclude Include="SortedNeedleCache.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -203,9 +202,7 @@
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="LinearMatcher.cpp" />
     <ClCompile Include="Log.cpp" />
-    <ClCompile Include="Matcher.cpp" />
     <ClCompile Include="ProgressBarCollection.cpp" />
-    <ClCompile Include="SortedNeedleCache.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

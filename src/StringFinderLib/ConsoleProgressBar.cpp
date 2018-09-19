@@ -14,7 +14,7 @@ namespace sf::lib
         std::cout << "Progress: [";
         for (uint32_t i = 0; i < kMaxSharpCount; ++i)
         {
-            std::cout << (i < sharpCount ? '#' : '-');
+            std::cout << (i < sharpCount ? '#' : '.');
         }
 
         std::cout << "] " << percentCount << "%\r";
