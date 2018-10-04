@@ -10,7 +10,7 @@
 
 namespace sf
 {
-    void StringFinder::Run(uint32_t threshold, std::wstring needlePath, std::wstring haystackPath)
+    void StringFinder::Run(size_t threshold, std::string needlePath, std::string haystackPath)
     {
         LOG_INFO("Run String Finder");
         // Compute needle size

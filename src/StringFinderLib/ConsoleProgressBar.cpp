@@ -3,8 +3,8 @@
 
 namespace sf::lib
 {
-    constexpr uint32_t kMaxSharpCount = 30;
-    constexpr uint32_t kPercentPerSharp = 100 / kMaxSharpCount;
+    constexpr size_t kMaxSharpCount = 30;
+    constexpr size_t kPercentPerSharp = 100 / kMaxSharpCount;
 
     void ConsoleProgressBar(size_t current, size_t end)
     {
@@ -12,7 +12,7 @@ namespace sf::lib
         const size_t sharpCount = percentCount / kPercentPerSharp;
 
         std::cout << "Progress: [";
-        for (uint32_t i = 0; i < kMaxSharpCount; ++i)
+        for (size_t i = 0; i < kMaxSharpCount; ++i)
         {
             std::cout << (i < sharpCount ? '#' : '.');
         }

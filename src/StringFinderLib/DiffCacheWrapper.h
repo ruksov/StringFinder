@@ -9,7 +9,7 @@ namespace sf::lib
     class DiffCacheWrapper
     {
     public:
-        explicit DiffCacheWrapper(std::wstring dataPath);
+        explicit DiffCacheWrapper(std::string dataPath);
 
         // Find first string, which matches data with match lenght at least one byte 
         std::optional<Result> CompareFirst(uint32_t dataOffset, const Data& data) const;

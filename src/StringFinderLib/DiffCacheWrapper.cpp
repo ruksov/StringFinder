@@ -7,7 +7,7 @@ namespace sf::lib
 {
     constexpr size_t kMaxOptimalDataSize = 1'000'000;
 
-    DiffCacheWrapper::DiffCacheWrapper(std::wstring dataPath)
+    DiffCacheWrapper::DiffCacheWrapper(std::string dataPath)
     {
         {
             std::ifstream file;
@@ -31,7 +31,6 @@ namespace sf::lib
         THROW_IF(dataOffset >= data.size(), "Wrong imput parameter for data [dataOffset=" << dataOffset << "]");
 
         const auto subStrIt = m_cache->find(diff_cache::Key(0, data.at(dataOffset)));
-#pragma warning (suppress : 26487)
         if (subStrIt == m_cache->end())
         {
             return std::nullopt;
@@ -43,7 +42,6 @@ namespace sf::lib
             return std::nullopt;
         }
 
-#pragma warning (suppress : 26487)
         return Result(dataOffset, subStrIt->second.Offset, matchLen);
     }
 
@@ -77,7 +75,6 @@ namespace sf::lib
             return std::nullopt;
         }
 
-#pragma warning (suppress : 26487)
         const auto subIt = it->second.DiffStrings->find(
             diff_cache::Key(diffOffset, data.at(static_cast<size_t>(dataOffset) + diffOffset))
         );
@@ -95,7 +92,6 @@ namespace sf::lib
             return std::nullopt;
         }
 
-#pragma warning (suppress : 26487)
         return Result(dataOffset, subIt->second.Offset, diffOffset + matchLen);
     }
 
@@ -113,7 +109,6 @@ namespace sf::lib
             return m_emptyOffsetList;
         }
 
-#pragma warning (suppress : 26487)
         return it->second.SubStrings ? *it->second.SubStrings : m_emptyOffsetList;
     }
 

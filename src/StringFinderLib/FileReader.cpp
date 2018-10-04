@@ -5,7 +5,7 @@
 
 namespace sf::lib
 {
-    FileReader::FileReader(std::wstring filePath, size_t dataSize)
+    FileReader::FileReader(std::string filePath, size_t dataSize)
         : m_dataSize(dataSize)
     {
         //

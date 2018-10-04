@@ -7,7 +7,7 @@ namespace sf
     class StringFinder
     {
     public:
-        void Run(uint32_t threshold, std::wstring needlePath, std::wstring haystackPath);
+        void Run(size_t threshold, std::string needlePath, std::string haystackPath);
 
     private:
         std::unique_ptr<lib::LinearMatcher> m_matcher;

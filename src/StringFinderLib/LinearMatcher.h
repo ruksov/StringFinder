@@ -7,7 +7,7 @@ namespace sf::lib
     class LinearMatcher
     {
     public:
-        LinearMatcher(size_t threshold, std::wstring filePath);
+        LinearMatcher(size_t threshold, std::string filePath);
 
         size_t Match(size_t hsIndex, size_t hsOffset, const Data& hs);
 
@@ -16,7 +16,7 @@ namespace sf::lib
         std::optional<Result> MatchHaystackMiddle(size_t hsOffset, const Data& hs);
         bool MatchHaystackEnd(size_t hsOffset, const Data& hs);
 
-        std::optional<Result> FindResFromPrevHsData(uint32_t nlOffset);
+        std::optional<Result> FindResFromPrevHsData(size_t nlOffset);
 
         void PushToResults(size_t hsIndex, size_t hsSize, Result& res, bool isCombineResult);
 

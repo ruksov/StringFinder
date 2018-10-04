@@ -6,7 +6,7 @@ namespace sf::lib
 {
     constexpr size_t OneMb = 1'000'000;
 
-    LinearMatcher::LinearMatcher(size_t threshold, std::wstring filePath)
+    LinearMatcher::LinearMatcher(size_t threshold, std::string filePath)
         : m_threshold(threshold)
         , m_cache(std::make_unique<DiffCacheWrapper>(std::move(filePath)))
     {
@@ -62,7 +62,6 @@ namespace sf::lib
             {
                 break;
             }
-
 
             if (res->MatchLen > maxRes.MatchLen)
             {
@@ -246,9 +245,9 @@ namespace sf::lib
         return !m_combineResults.empty();
     }
 
-    std::optional<Result> LinearMatcher::FindResFromPrevHsData(uint32_t nlOffset)
+    std::optional<Result> LinearMatcher::FindResFromPrevHsData(size_t nlOffset)
     {
-        auto& subRanges = m_cache->GetSubStrings(nlOffset);
+        auto& subRanges = m_cache->GetSubStrings(static_cast<uint32_t>(nlOffset));
 
         if (m_combineResults.empty()
             || nlOffset > m_combineResults.begin()->first

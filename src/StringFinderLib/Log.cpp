@@ -3,7 +3,7 @@
 
 namespace sf::lib
 {
-    void LogThreadSafe(std::wstringstream ss)
+    void LogThreadSafe(std::stringstream ss)
     {
         static std::mutex m;
         const auto t = std::time(nullptr);
@@ -11,6 +11,6 @@ namespace sf::lib
         localtime_s(&lt, &t);
 
         std::lock_guard lock(m);
-        std::wcout << std::put_time(&lt, L"%T ") << ss.str() << '\n';
+        std::cout << std::put_time(&lt, "%T ") << ss.str() << '\n';
     }
 }
