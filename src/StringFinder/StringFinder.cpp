@@ -4,6 +4,7 @@
 #include "FileReader.h"
 #include "Exceptions.h"
 #include "Log.h"
+#include "Matcher.h"
 
 #include "ProgressBarCollection.h"
 #include "ConsoleProgressBar.h"
@@ -12,6 +13,9 @@ namespace sf
 {
     void StringFinder::Run(size_t threshold, std::string needlePath, std::string haystackPath)
     {
+        m_resultLog.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        m_resultLog.open("result.log", std::ios::out);
+
         LOG_INFO("Run String Finder");
         // Compute needle size
         size_t needleSize = 0;
@@ -23,7 +27,8 @@ namespace sf
         }
 
         LOG_INFO("Initialize matcher");
-        m_matcher = std::make_unique<lib::LinearMatcher>(threshold, std::move(needlePath));
+        //m_matcher = std::make_unique<lib::LinearMatcher>(threshold, std::move(needlePath));
+        lib::Matcher matcher(threshold, std::move(needlePath));
         LOG_INFO("Finish initialize matcher");;
 
         LOG_INFO("Initialize reader for haystack buffer");
@@ -40,13 +45,25 @@ namespace sf
         while (!hsData.get().empty())
         {
             LOG_DEBUG("Start handle haystack data #" << m_haystack->GetIndex());
+            const size_t hsIndex = m_haystack->GetIndex();
             const auto hsDataSize = hsData.get().size();
-            for (size_t i = 0; i < hsDataSize; ++i)
+            std::optional<lib::Result> res;
+            for (size_t i = 0; i < hsDataSize;)
             {
-                size_t matchLen = m_matcher->Match(m_haystack->GetIndex(), i, hsData);
-                if (matchLen != 0)
+                res = matcher.Match(i, hsData);
+                if (res)
                 {
-                    i += matchLen - 1;
+                    if (i + res->MatchLen < hsDataSize 
+                        || m_haystack->GetIndex() == m_haystack->GetDataCount() - 1)
+                    {
+                        res->HsOffset += (m_haystack->GetIndex() - (res->HsOffset == i ? 0 : 1)) * hsDataSize;
+                        PrintResult(res.value());
+                    }
+                    i += res->MatchLen;
+                }
+                else
+                {
+                    ++i;
                 }
             }
 
@@ -54,5 +71,15 @@ namespace sf
             hsData = m_haystack->GetNext();
         }
         LOG_INFO("String Finder finished search");
+    }
+    void StringFinder::PrintResult(lib::Result res)
+    {
+        LOG_DEBUG("Found new match result:\n"
+            << "\tHsOffset = " << res.HsOffset << '\n'
+            << "\tNlOffset = " << res.NlOffset << '\n'
+            << "\tMatchLen = " << res.MatchLen << '\n');
+        m_resultLog << "sequence of length = " << res.MatchLen
+            << " found at haystack offset " << res.HsOffset
+            << ", needle offset " << res.NlOffset << '\n';
     }
 }

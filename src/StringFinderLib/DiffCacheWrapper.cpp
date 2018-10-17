@@ -26,7 +26,7 @@ namespace sf::lib
         m_cache = diff_cache::Create(m_cacheData, m_iteratorList);
     }
 
-    std::optional<Result> DiffCacheWrapper::CompareFirst(uint32_t dataOffset, const Data & data) const
+    std::optional<Result> DiffCacheWrapper::CompareFirst(size_t dataOffset, const Data & data) const
     {
         THROW_IF(dataOffset >= data.size(), "Wrong imput parameter for data [dataOffset=" << dataOffset << "]");
 
@@ -45,15 +45,15 @@ namespace sf::lib
         return Result(dataOffset, subStrIt->second.Offset, matchLen);
     }
 
-    std::optional<Result> DiffCacheWrapper::CompareNext(uint32_t cacheOffset,
-        uint32_t diffOffset,
-        uint32_t dataOffset,
+    std::optional<Result> DiffCacheWrapper::CompareNext(size_t cacheOffset,
+        size_t diffOffset,
+        size_t dataOffset,
         const Data & data) const
     {
         THROW_IF(dataOffset >= data.size(), "Wrong imput parameter for data [dataOffset=" << dataOffset << "]");
 
-        if (static_cast<size_t>(dataOffset) + diffOffset >= m_cacheData.size()
-            || static_cast<size_t>(cacheOffset) + diffOffset >= m_cacheData.size())
+        if (dataOffset + diffOffset >= m_cacheData.size()
+            || cacheOffset + diffOffset >= m_cacheData.size())
         {
             return std::nullopt;
         }
@@ -76,7 +76,7 @@ namespace sf::lib
         }
 
         const auto subIt = it->second.DiffStrings->find(
-            diff_cache::Key(diffOffset, data.at(static_cast<size_t>(dataOffset) + diffOffset))
+            diff_cache::Key(static_cast<uint32_t>(diffOffset), data.at(dataOffset + diffOffset))
         );
         if (subIt == it->second.DiffStrings->end())
         {
@@ -85,7 +85,7 @@ namespace sf::lib
 
         const auto matchLen = CompareData(static_cast<size_t>(subIt->second.Offset) + diffOffset
             , m_cacheData
-            , static_cast<size_t>(dataOffset) + diffOffset
+            , dataOffset + diffOffset
             , data);
         if (matchLen == 0)
         {
@@ -95,21 +95,24 @@ namespace sf::lib
         return Result(dataOffset, subIt->second.Offset, diffOffset + matchLen);
     }
 
-    const diff_cache::OffsetList& DiffCacheWrapper::GetSubStrings(uint32_t offset) const
+    const diff_cache::OffsetList& DiffCacheWrapper::GetSubStrings(size_t offset) const
     {
         THROW_IF(offset >= m_iteratorList.size(), "Wrong input parameter for cache data [offset=" << offset << "]");
 
         auto it = m_iteratorList.at(offset);
-        if (it->second.Offset != offset)
+        if (it->second.Offset == offset
+            && it->second.SubStrings)
         {
-            // cache offset must be in sub string container in 'it' object
-            assert(it->second.SubStrings != nullptr);
-            assert(std::is_sorted(it->second.SubStrings->begin(), it->second.SubStrings->end()));
-            assert(std::binary_search(it->second.SubStrings->begin(), it->second.SubStrings->end(), offset));
-            return m_emptyOffsetList;
+            // we found offset in needle that has substrings 
+            return *it->second.SubStrings;
         }
 
-        return it->second.SubStrings ? *it->second.SubStrings : m_emptyOffsetList;
+        // passed offset must be in found iterators sub strings container
+        assert(it->second.SubStrings != nullptr);
+        assert(std::is_sorted(it->second.SubStrings->begin(), it->second.SubStrings->end()));
+        assert(std::binary_search(it->second.SubStrings->begin(), it->second.SubStrings->end(), offset));
+
+        return m_emptySubStrings;
     }
 
     const size_t DiffCacheWrapper::GetCacheDataSize() const noexcept

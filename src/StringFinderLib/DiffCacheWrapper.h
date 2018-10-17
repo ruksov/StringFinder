@@ -12,16 +12,16 @@ namespace sf::lib
         explicit DiffCacheWrapper(std::string dataPath);
 
         // Find first string, which matches data with match lenght at least one byte 
-        std::optional<Result> CompareFirst(uint32_t dataOffset, const Data& data) const;
+        std::optional<Result> CompareFirst(size_t dataOffset, const Data& data) const;
 
         // Return compare result between string from diff tree and data
-        std::optional<Result> CompareNext(uint32_t cacheOffset,
-            uint32_t diffOffset,
-            uint32_t dataOffset,
+        std::optional<Result> CompareNext(size_t cacheOffset,
+            size_t diffOffset,
+            size_t dataOffset,
             const Data& data) const;
 
         // Return offsets of strings which equal to parrent string but less than it
-        const diff_cache::OffsetList& GetSubStrings(uint32_t offset) const;
+        const diff_cache::OffsetList& GetSubStrings(size_t offset) const;
 
         const size_t GetCacheDataSize() const noexcept;
 
@@ -32,7 +32,7 @@ namespace sf::lib
         Data m_cacheData;
         diff_cache::DiffCachePtr m_cache;
         std::vector<diff_cache::ConstIterator> m_iteratorList;
-        const diff_cache::OffsetList m_emptyOffsetList;
+        const diff_cache::OffsetList m_emptySubStrings;
     };
 }
 
