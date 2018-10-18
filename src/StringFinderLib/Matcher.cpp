@@ -50,6 +50,10 @@ namespace sf::lib
 
             if (!it->second.DiffStrings || hsDataOffset + diffOffset + matchLen >= hsData.size())
             {
+                res.HsDataIndex = hsDataIndex;
+                res.HsDataOffset = hsDataOffset;
+                res.NlOffset = it->second.Offset;
+                res.MatchLen = diffOffset + matchLen;
                 break;
             }
 
