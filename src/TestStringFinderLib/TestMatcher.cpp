@@ -95,7 +95,7 @@ TEST_F(TestMatcher, MatchMiddle_OneOffset)
     ASSERT_EQ(1, m_matcher->GetResults().size());
 
     auto& testRes = m_matcher->GetResults().back();
-    ASSERT_EQ(expectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(expectRes.HsDataOffset, testRes.HsDataOffset);
     ASSERT_EQ(expectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(expectRes.MatchLen, testRes.MatchLen);
 }
@@ -117,7 +117,7 @@ TEST_F(TestMatcher, MatchMiddle_MaxResult)
     ASSERT_EQ(1, m_matcher->GetResults().size());
 
     auto& testRes = m_matcher->GetResults().back();
-    ASSERT_EQ(expectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(expectRes.HsDataOffset, testRes.HsDataOffset);
     ASSERT_EQ(expectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(expectRes.MatchLen, testRes.MatchLen);
 }
@@ -149,9 +149,9 @@ TEST_F(TestMatcher, MatchMiddle_FixPrevResult)
 
     auto& testRes = m_matcher->GetResults().back();
     auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
-    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsDataOffset, testRes.MatchLen);
     ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
-    ASSERT_EQ(expectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(expectRes.HsDataOffset, testRes.HsDataOffset);
     ASSERT_EQ(expectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(expectRes.MatchLen, testRes.MatchLen);
 
@@ -162,9 +162,9 @@ TEST_F(TestMatcher, MatchMiddle_FixPrevResult)
 
     auto& fixedTestRes = m_matcher->GetResults().back();
     nlPart = m_needle.substr(fixedTestRes.NlOffset, fixedTestRes.MatchLen);
-    hsPart = m_haystack.substr(fixedTestRes.HsOffset, fixedTestRes.MatchLen);
+    hsPart = m_haystack.substr(fixedTestRes.HsDataOffset, fixedTestRes.MatchLen);
     ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
-    ASSERT_EQ(fixedExpectRes.HsOffset, fixedTestRes.HsOffset);
+    ASSERT_EQ(fixedExpectRes.HsDataOffset, fixedTestRes.HsDataOffset);
     ASSERT_EQ(fixedExpectRes.NlOffset, fixedTestRes.NlOffset);
     ASSERT_EQ(fixedExpectRes.MatchLen, fixedTestRes.MatchLen);
 }
@@ -181,7 +181,7 @@ TEST_F(TestMatcher, MatchMiddle_FixHsOffset)
     EXPECT_CALL(*m_mock, GetNeedle())
         .WillOnce(ReturnRef(m_needle));
 
-    EXPECT_CALL(*m_mock, GetOffsetList(m_haystack.at(expectRes.HsOffset)))
+    EXPECT_CALL(*m_mock, GetOffsetList(m_haystack.at(expectRes.HsDataOffset)))
         .WillOnce(ReturnRef(m_offsetList));
 
     ASSERT_NO_THROW(ResetMatcher());
@@ -193,9 +193,9 @@ TEST_F(TestMatcher, MatchMiddle_FixHsOffset)
 
     auto& testRes = m_matcher->GetResults().back();
     auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
-    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsDataOffset, testRes.MatchLen);
     ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
-    ASSERT_EQ(expectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(expectRes.HsDataOffset, testRes.HsDataOffset);
     ASSERT_EQ(expectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(expectRes.MatchLen, testRes.MatchLen);
 }
@@ -266,9 +266,9 @@ TEST_F(TestMatcher, MatchBegin_CombineWithEnd_SecondPartLessThenThreshold)
 
     auto& testRes = m_matcher->GetResults().back();
     auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
-    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsDataOffset, testRes.MatchLen);
     ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
-    ASSERT_EQ(combineExpectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(combineExpectRes.HsDataOffset, testRes.HsDataOffset);
     ASSERT_EQ(combineExpectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(combineExpectRes.MatchLen, testRes.MatchLen);
 }
@@ -308,9 +308,9 @@ TEST_F(TestMatcher, MatchBegin_CombineWithEnd_ChoseMaxCombineResult)
 
     auto& testRes = m_matcher->GetResults().back();
     auto nlPart = m_needle.substr(testRes.NlOffset, testRes.MatchLen);
-    auto hsPart = m_haystack.substr(testRes.HsOffset, testRes.MatchLen);
+    auto hsPart = m_haystack.substr(testRes.HsDataOffset, testRes.MatchLen);
     ASSERT_STREQ(nlPart.c_str(), hsPart.c_str());
-    ASSERT_EQ(combineExpectRes.HsOffset, testRes.HsOffset);
+    ASSERT_EQ(combineExpectRes.HsDataOffset, testRes.HsDataOffset);
     ASSERT_EQ(combineExpectRes.NlOffset, testRes.NlOffset);
     ASSERT_EQ(combineExpectRes.MatchLen, testRes.MatchLen);
 }

@@ -42,11 +42,11 @@ namespace sf::lib
             return 0;
         }
 
-        const bool isCombineResult = hsOffset != res.value().HsOffset;
+        const bool isCombineResult = hsOffset != res.value().HsDataOffset;
         PushToResults(hsIndex, hs.size(), res.value(), isCombineResult);
         if (isCombineResult)
         {
-            res.value().MatchLen -= hs.size() - (res.value().HsOffset % hs.size());
+            res.value().MatchLen -= hs.size() - (res.value().HsDataOffset % hs.size());
         }
         return res.value().MatchLen;
     }
@@ -221,7 +221,7 @@ namespace sf::lib
                 for (auto subOffsetIt = subStrings.begin(); subOffsetIt != subStringsEnd; ++subOffsetIt)
                 {
                     m_combineResults.emplace(*subOffsetIt + res->MatchLen,
-                        Result(res->HsOffset, *subOffsetIt, res->MatchLen));
+                        Result(res->HsDataOffset, *subOffsetIt, res->MatchLen));
                 }
 
                 m_optimizedRes.MatchLen = 0;
@@ -276,7 +276,7 @@ namespace sf::lib
                     // Found frist part of combine result
                     LOG_DEBUG("Found first part of result from previous haystack data chunck,"
                         << " which can be summ with current result"
-                        << "\n\t first part haystack offset = " << firstPart->second.HsOffset
+                        << "\n\t first part haystack offset = " << firstPart->second.HsDataOffset
                         << "\n\t first part needle offset = " << firstPart->second.NlOffset
                         << "\n\t first part match length = " << firstPart->second.MatchLen);
 
@@ -290,26 +290,26 @@ namespace sf::lib
 
     void LinearMatcher::PushToResults(size_t hsIndex, size_t hsSize, Result& res, bool isCombineResult)
     {
-        if (res.HsOffset + res.MatchLen == hsSize)
+        if (res.HsDataOffset + res.MatchLen == hsSize)
         {
             LOG_DEBUG("Save result, which matches to end of hs data chunck");
             m_cacheRes = res;
-            m_cacheRes.HsOffset += hsIndex * hsSize;
+            m_cacheRes.HsDataOffset += hsIndex * hsSize;
             return;
         }
 
         if (m_cacheRes.MatchLen != 0
             && m_cacheRes.NlOffset + m_cacheRes.MatchLen == res.NlOffset
-            && m_cacheRes.HsOffset > m_cache->GetCacheDataSize() * (hsIndex - 1))
+            && m_cacheRes.HsDataOffset > m_cache->GetCacheDataSize() * (hsIndex - 1))
         {
             assert(hsIndex != 0);
             res.MatchLen += m_cacheRes.MatchLen;
-            res.HsOffset = m_cacheRes.HsOffset;
+            res.HsDataOffset = m_cacheRes.HsDataOffset;
             res.NlOffset = m_cacheRes.NlOffset;
 
             LOG_DEBUG("Found match result wich is continue of previous.\n"
                 << "Fixed match result:\n"
-                << "\tHsOffset = " << res.HsOffset << '\n'
+                << "\tHsOffset = " << res.HsDataOffset << '\n'
                 << "\tNlOffset = " << res.NlOffset << '\n'
                 << "\tMatchLen = " << res.MatchLen << '\n');
         }
@@ -318,20 +318,20 @@ namespace sf::lib
             if (m_cacheRes.MatchLen != 0)
             {
                 m_resultLog << "sequence of length = " << m_cacheRes.MatchLen
-                    << " found at haystack offset " << m_cacheRes.HsOffset
+                    << " found at haystack offset " << m_cacheRes.HsDataOffset
                     << ", needle offset " << m_cacheRes.NlOffset << '\n';
             }
             
-            res.HsOffset += m_cache->GetCacheDataSize() * (hsIndex - (isCombineResult ? 1 : 0));
+            res.HsDataOffset += m_cache->GetCacheDataSize() * (hsIndex - (isCombineResult ? 1 : 0));
             
             LOG_DEBUG("Found new match result:\n"
-                << "\tHsOffset = " << res.HsOffset << '\n'
+                << "\tHsOffset = " << res.HsDataOffset << '\n'
                 << "\tNlOffset = " << res.NlOffset << '\n'
                 << "\tMatchLen = " << res.MatchLen << '\n');
         }
 
         m_resultLog << "sequence of length = " << res.MatchLen
-            << " found at haystack offset " << res.HsOffset
+            << " found at haystack offset " << res.HsDataOffset
             << ", needle offset " << res.NlOffset << '\n';
 
         m_cacheRes.MatchLen = 0;

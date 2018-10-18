@@ -69,4 +69,9 @@ namespace sf::lib
     {
         return m_dataCount;
     }
+
+    size_t FileReader::GetDataSize() const noexcept
+    {
+        return m_dataSize;
+    }
 }

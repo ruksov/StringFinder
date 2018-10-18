@@ -28,7 +28,7 @@ namespace sf
 
         LOG_INFO("Initialize matcher");
         //m_matcher = std::make_unique<lib::LinearMatcher>(threshold, std::move(needlePath));
-        lib::Matcher matcher(threshold, std::move(needlePath));
+        lib::Matcher matcher(threshold, std::move(needlePath), [this](lib::Result res) { PrintResult(res); });
         LOG_INFO("Finish initialize matcher");;
 
         LOG_INFO("Initialize reader for haystack buffer");
@@ -47,24 +47,10 @@ namespace sf
             LOG_DEBUG("Start handle haystack data #" << m_haystack->GetIndex());
             const size_t hsIndex = m_haystack->GetIndex();
             const auto hsDataSize = hsData.get().size();
-            std::optional<lib::Result> res;
             for (size_t i = 0; i < hsDataSize;)
             {
-                res = matcher.Match(i, hsData);
-                if (res)
-                {
-                    if (i + res->MatchLen < hsDataSize 
-                        || m_haystack->GetIndex() == m_haystack->GetDataCount() - 1)
-                    {
-                        res->HsOffset += (m_haystack->GetIndex() - (res->HsOffset == i ? 0 : 1)) * hsDataSize;
-                        PrintResult(res.value());
-                    }
-                    i += res->MatchLen;
-                }
-                else
-                {
-                    ++i;
-                }
+                size_t matchLen = matcher.Match(hsIndex, i, hsData);
+                i += matchLen == 0 ? 1 : matchLen;
             }
 
             progressView.OnProgressChange(m_haystack->GetIndex());
@@ -75,11 +61,11 @@ namespace sf
     void StringFinder::PrintResult(lib::Result res)
     {
         LOG_DEBUG("Found new match result:\n"
-            << "\tHsOffset = " << res.HsOffset << '\n'
+            << "\tHsOffset = " << res.HsDataOffset + (res.HsDataIndex * m_haystack->GetDataSize()) << '\n'
             << "\tNlOffset = " << res.NlOffset << '\n'
             << "\tMatchLen = " << res.MatchLen << '\n');
         m_resultLog << "sequence of length = " << res.MatchLen
-            << " found at haystack offset " << res.HsOffset
+            << " found at haystack offset " << res.HsDataOffset + (res.HsDataIndex * m_haystack->GetDataSize())
             << ", needle offset " << res.NlOffset << '\n';
     }
 }

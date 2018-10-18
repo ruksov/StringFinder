@@ -13,6 +13,7 @@ namespace sf::lib
         bool IsEnd() const noexcept override;
         size_t GetIndex() const noexcept override;
         size_t GetDataCount() const noexcept override;
+        size_t GetDataSize() const noexcept override;
 
     private:
         std::ifstream m_file;

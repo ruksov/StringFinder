@@ -21,5 +21,6 @@ namespace sf::lib
         virtual bool IsEnd() const noexcept = 0;
         virtual size_t GetIndex() const noexcept = 0;
         virtual size_t GetDataCount() const noexcept = 0;
+        virtual size_t GetDataSize() const noexcept = 0;
     };
 }

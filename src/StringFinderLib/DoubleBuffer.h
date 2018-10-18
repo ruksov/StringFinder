@@ -15,6 +15,7 @@ namespace sf::lib
         const std::reference_wrapper<Data> GetNext();
         size_t GetIndex() const noexcept;
         size_t GetDataCount() const noexcept;
+        size_t GetDataSize() const noexcept;
 
     private:
         std::future<void> LaunchReadThread();
