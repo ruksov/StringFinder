@@ -22,70 +22,38 @@ namespace sf::lib
         //std::optional<Result> res;
         if (hsDataOffset == 0)
         {
-            size_t matchLenInCurrentChunck = 0;
-            auto prevRes = GetResultFromPrevChunck(hsData, matchLenInCurrentChunck);
-            if (prevRes.MatchLen >= m_threshold && m_logResultFn)
+            size_t currentMatchLen = 0;
+            auto res = GetResultFromPrevChunck(hsData, currentMatchLen);
+            if (res && res->MatchLen >= m_threshold && m_logResultFn)
             {
-                m_logResultFn(prevRes);
-                return matchLenInCurrentChunck;
+                m_logResultFn(res.value());
+                return currentMatchLen;
             }
         }
 
-        Result res;
-        std::reference_wrapper<diff_cache::DiffCache> cacheRef = *m_needleCache;
-        auto it = cacheRef.get().find(diff_cache::Key(0, hsData.at(hsDataOffset)));
+        auto res = FindMaxResult(hsDataOffset, hsData);
 
-        while(it != cacheRef.get().end())
+        if (!res)
         {
-            size_t diffOffset = it->first.Info.Offset;
-            size_t cmpNlOffset = it->second.Offset + diffOffset;
-            size_t cmpHsOffset = hsDataOffset + diffOffset;
-
-            size_t matchLen = CompareWithHaystack(cmpNlOffset, cmpHsOffset, hsData);
-
-            if (matchLen == 0)
-            {
-                break;
-            }
-
-            if (!it->second.DiffStrings || hsDataOffset + diffOffset + matchLen >= hsData.size())
-            {
-                res.HsDataIndex = hsDataIndex;
-                res.HsDataOffset = hsDataOffset;
-                res.NlOffset = it->second.Offset;
-                res.MatchLen = diffOffset + matchLen;
-                break;
-            }
-
-            cacheRef = *it->second.DiffStrings;
-            it = cacheRef.get().find(diff_cache::Key(static_cast<uint32_t>(diffOffset + matchLen), 
-                hsData.at(hsDataOffset + diffOffset + matchLen)));
-
-            if (it == cacheRef.get().end())
-            {
-                res.HsDataIndex = hsDataIndex;
-                res.HsDataOffset = hsDataOffset;
-                res.NlOffset = cmpNlOffset - diffOffset;
-                res.MatchLen = diffOffset + matchLen;
-                break;
-            }
+            return 0;
         }
 
-        if (res.HsDataOffset + res.MatchLen == hsData.size())
+        res->HsDataIndex = hsDataIndex;
+        if (res->HsDataOffset + res->MatchLen == hsData.size())
         {
             m_prevRes = res;
         }
-        else if (res.MatchLen < m_threshold)
+        else if (res->MatchLen < m_threshold)
         {
-            res.MatchLen = 0;
+            res->MatchLen = 0;
         }
 
-        if (res.MatchLen >= m_threshold && !m_prevRes && m_logResultFn)
+        if (res->MatchLen >= m_threshold && !m_prevRes && m_logResultFn)
         {
-            m_logResultFn(res);
+            m_logResultFn(res.value());
         }
 
-        return res.MatchLen;
+        return res->MatchLen;
     }
 
     size_t Matcher::CompareWithHaystack(size_t nlOffset, size_t hsOffset, const Data & hsData) const
@@ -99,16 +67,89 @@ namespace sf::lib
         return matchLen;
     }
 
-    Result Matcher::GetResultFromPrevChunck(const Data& hsData, size_t& matchLenInCurrentChunck)
+    std::optional<Result> Matcher::GetResultFromPrevChunck(const Data& hsData, size_t& currentMatchLen)
+    {
+        if (!m_prevRes)
+        {
+            return std::nullopt;
+        }
+
+        auto res = m_prevRes.value();
+        m_prevRes.reset();
+
+        currentMatchLen += CompareWithHaystack(res.NlOffset + res.MatchLen, 0, hsData);
+
+        auto it = m_needleIteratorList.at(res.NlOffset);
+        if (res.NlOffset != it->second.Offset
+            || !it->second.DiffStrings
+            || currentMatchLen >= hsData.size())
+        {
+            res.MatchLen += currentMatchLen;
+            return res;
+        }
+
+        DiffCacheRef cacheRef = *it->second.DiffStrings;
+        it = cacheRef.get().find(diff_cache::Key(static_cast<uint32_t>(res.MatchLen + currentMatchLen)
+            , hsData.at(currentMatchLen)));
+
+        while (it != cacheRef.get().end())
+        {
+            res.NlOffset = it->second.Offset;
+            currentMatchLen += CompareWithHaystack(res.NlOffset + it->first.Info.Offset
+                , currentMatchLen
+                , hsData);
+
+            if (it->first.Info.Offset == res.MatchLen + currentMatchLen // we did not match more bytes
+                || !it->second.DiffStrings                              // we can't more move through diff tree
+                || currentMatchLen >= hsData.size())                    // we matched full haysatck data
+            {
+                break;
+            }
+
+            cacheRef = *it->second.DiffStrings;
+            it = cacheRef.get().find(diff_cache::Key(static_cast<uint32_t>(res.MatchLen + currentMatchLen)
+                , hsData.at(currentMatchLen)));
+        }
+
+        res.MatchLen += currentMatchLen;
+        return res;
+    }
+
+    std::optional<Result> Matcher::FindMaxResult(size_t hsOffset, const Data & hsData) const
+    {
+        return FindMaxResult(*m_needleCache
+            , m_needleCache->find(diff_cache::Key(0, hsData.at(hsOffset)))
+            , hsOffset
+            , hsData);
+    }
+
+    std::optional<Result> Matcher::FindMaxResult(DiffCacheRef cache, 
+        diff_cache::Iterator it, 
+        size_t hsOffset, 
+        const Data & hsData) const 
     {
         Result res;
-        if (m_prevRes)
+        res.HsDataOffset = hsOffset;
+
+        while (it != cache.get().end())
         {
-            matchLenInCurrentChunck += CompareWithHaystack(m_prevRes->NlOffset + m_prevRes->MatchLen, 0, hsData);
-            res = m_prevRes.value();
-            res.MatchLen += matchLenInCurrentChunck;
-            m_prevRes.reset();
+            res.NlOffset = it->second.Offset;
+            res.MatchLen = it->first.Info.Offset;
+
+            res.MatchLen += CompareWithHaystack(it->second.Offset + res.MatchLen, hsOffset + res.MatchLen, hsData);
+
+            if (it->first.Info.Offset == res.MatchLen                   // we did not match more bytes
+                || !it->second.DiffStrings                              // we can't more move through diff tree
+                || res.MatchLen + res.HsDataOffset >= hsData.size())    // we matched full haysatck data
+            {
+                break;
+            }
+
+            cache = *it->second.DiffStrings;
+            it = cache.get().find(diff_cache::Key(static_cast<uint32_t>(res.MatchLen)
+                , hsData.at(res.HsDataOffset + res.MatchLen)));
         }
-        return res;
+
+        return res.MatchLen == 0 ? std::nullopt : std::make_optional(res);
     }
 }

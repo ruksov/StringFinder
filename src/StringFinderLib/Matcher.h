@@ -5,6 +5,7 @@
 namespace sf::lib
 {
     using LogResultFn = std::function<void(Result)>;
+    using DiffCacheRef = std::reference_wrapper<diff_cache::DiffCache>;
 
     class Matcher
     {
@@ -14,7 +15,16 @@ namespace sf::lib
 
     private:
         size_t CompareWithHaystack(size_t nlOffset, size_t hsOffset, const Data & hsData) const;
-        Result GetResultFromPrevChunck(const Data& hsData, size_t& matchLenInCurrentChunck);
+        std::optional<Result> GetResultFromPrevChunck(const Data& hsData, size_t& matchLenInCurrentChunck);
+
+        std::optional<Result> FindMaxResult(size_t hsOffset, const Data& hsData) const;
+        std::optional<Result> FindMaxResult(DiffCacheRef cache, 
+            diff_cache::Iterator it, 
+            size_t hsOffset, 
+            const Data& hsData) const;
+
+        std::optional<Result> FindMaxResult(Result res, size_t hsOffset, const Data& hsData) const;
+        Result FindMaxResult_BasedOnPrevResult(size_t hsOfsset, const Data& hsData) const;
 
     private:
         size_t m_threshold;
