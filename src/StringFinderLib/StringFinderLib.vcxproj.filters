@@ -45,9 +45,6 @@
     <ClInclude Include="DiffCache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LinearMatcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DiffCacheWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,9 +72,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DiffCache.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LinearMatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DiffCacheWrapper.cpp">

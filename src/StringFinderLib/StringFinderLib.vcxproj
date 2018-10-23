@@ -186,7 +186,6 @@
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="IReader.h" />
-    <ClInclude Include="LinearMatcher.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="DiffCacheTypes.h" />
     <ClInclude Include="Matcher.h" />
@@ -201,7 +200,6 @@
     <ClCompile Include="DiffCacheWrapper.cpp" />
     <ClCompile Include="DoubleBuffer.cpp" />
     <ClCompile Include="FileReader.cpp" />
-    <ClCompile Include="LinearMatcher.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Matcher.cpp" />
     <ClCompile Include="ProgressBarCollection.cpp" />

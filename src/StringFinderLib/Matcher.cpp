@@ -22,6 +22,48 @@ namespace sf::lib
         //std::optional<Result> res;
         if (hsDataOffset == 0)
         {
+            size_t matchLenInCurrentChunck = 0;
+            auto prevRes = GetResultFromPrevChunck(hsData, matchLenInCurrentChunck);
+            if (prevRes.MatchLen >= m_threshold && m_logResultFn)
+            {
+                m_logResultFn(prevRes);
+                return matchLenInCurrentChunck;
+            }
+        }
+
+        Result res;
+        std::reference_wrapper<diff_cache::DiffCache> cacheRef = *m_needleCache;
+        auto it = cacheRef.get().find(diff_cache::Key(0, hsData.at(hsDataOffset)));
+
+        while(it != cacheRef.get().end())
+        {
+            size_t diffOffset = it->first.Info.Offset;
+            size_t cmpNlOffset = it->second.Offset + diffOffset;
+            size_t cmpHsOffset = hsDataOffset + diffOffset;
+#include "stdafx.h"
+#include "Matcher.h"
+
+namespace sf::lib
+{
+    Matcher::Matcher(size_t threshold, std::string needlePath, LogResultFn logResultFn)
+        : m_threshold(threshold)
+        , m_logResultFn(logResultFn)
+    {
+        {
+            std::ifstream file;
+            file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            file.open(needlePath, std::ios::in | std::ios::binary);
+            m_needleData.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        }
+
+        m_needleCache = diff_cache::Create(m_needleData, m_needleIteratorList);
+    }
+
+    size_t Matcher::Match(size_t hsDataIndex, size_t hsDataOffset, const Data & hsData)
+    {
+        //std::optional<Result> res;
+        if (hsDataOffset == 0)
+        {
             size_t currentMatchLen = 0;
             auto res = GetResultFromPrevChunck(hsData, currentMatchLen);
             if (res && res->MatchLen >= m_threshold && m_logResultFn)
@@ -36,6 +78,35 @@ namespace sf::lib
         if (!res)
         {
             return 0;
+
+            size_t matchLen = CompareWithHaystack(cmpNlOffset, cmpHsOffset, hsData);
+
+            if (matchLen == 0)
+            {
+                break;
+            }
+
+            if (!it->second.DiffRanges || hsDataOffset + diffOffset + matchLen >= hsData.size())
+            {
+                res.HsDataIndex = hsDataIndex;
+                res.HsDataOffset = hsDataOffset;
+                res.NlOffset = it->second.Offset;
+                res.MatchLen = diffOffset + matchLen;
+                break;
+            }
+
+            cacheRef = *it->second.DiffRanges;
+            it = cacheRef.get().find(diff_cache::Key(static_cast<uint32_t>(diffOffset + matchLen), 
+                hsData.at(hsDataOffset + diffOffset + matchLen)));
+
+            if (it == cacheRef.get().end())
+            {
+                res.HsDataIndex = hsDataIndex;
+                res.HsDataOffset = hsDataOffset;
+                res.NlOffset = cmpNlOffset - diffOffset;
+                res.MatchLen = diffOffset + matchLen;
+                break;
+            }
         }
 
         res->HsDataIndex = hsDataIndex;

@@ -4,8 +4,8 @@
 namespace sf::lib::diff_cache
 {
     using Data = std::string;
-    using DiffCachePtr = std::unique_ptr<DiffCache>;
-    using IteratorList = std::vector<ConstIterator>;
+    using DiffCacheRef = std::reference_wrapper<DiffCache>;
+    using IteratorList = std::vector<Iterator>;
 
-    DiffCachePtr Create(const Data& data, IteratorList& iteratorList);
+    DiffCache Create(const Data& data, IteratorList& iteratorList);
 }

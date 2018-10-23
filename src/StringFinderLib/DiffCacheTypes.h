@@ -5,40 +5,24 @@
 
 namespace sf::lib::diff_cache
 {
-    struct DiffInfo
-    {
-        uint32_t Offset = 0;
-        char Byte = 0;
-
-        DiffInfo(uint32_t offset, char byte) noexcept
-            : Offset(offset)
-            , Byte(byte)
-        {
-        }
-    };
-
     struct Key
     {
-        union
-        {
-            DiffInfo Info;
-            size_t CompareValue = 0;
-        };
+        // offset of the first different byte
+        size_t DiffOffset = 0;
 
-        Key(uint32_t diffOffset, char diffByte) noexcept
-            : Info(diffOffset, diffByte)
+        // value of the first different byte
+        char DiffByte = 0;
+
+
+        Key(size_t diffOffset, char diffByte) noexcept
+            : DiffOffset(diffOffset)
+            , DiffByte(diffByte)
         {
         }
 
         bool operator==(const Key& other) const noexcept
         {
-            return (Info.Byte == other.Info.Byte
-                && Info.Offset == other.Info.Offset);
-        }
-
-        bool operator<(const Key& other) const noexcept
-        {
-            return CompareValue < other.CompareValue;
+            return (DiffOffset == other.DiffOffset && DiffByte == other.DiffByte);
         }
     };
 
@@ -46,28 +30,28 @@ namespace sf::lib::diff_cache
     {
         size_t operator()(Key const& k) const noexcept
         {
-            const size_t h1 = std::hash<char>()(k.Info.Byte);
-            const size_t h2 = std::hash<uint32_t>()(k.Info.Offset);
-            return h1 ^ (h2 << 1);
+            const size_t h1 = std::hash<char>()(k.DiffByte);
+            const size_t h2 = k.DiffOffset;
+            return (h1 << 32) ^ h2;
         }
     };
 
-    struct Value;
-    using DiffCache = std::unordered_map<Key, Value, KeyHash>;
+    using DiffCache = std::unordered_map<Key, struct Value, KeyHash>;
     using Iterator = DiffCache::iterator;
     using ConstIterator = DiffCache::const_iterator;
-    using OffsetList = std::vector<uint32_t>;
+    using OffsetList = std::vector<size_t>;
 
     struct Value
     {
-        std::unique_ptr<DiffCache> DiffStrings;
-        std::unique_ptr<OffsetList> SubStrings;
-        uint32_t Offset = 0;
+        // offset of the first byte 
+        size_t Offset = 0;
 
-        explicit Value(uint32_t offset) noexcept
+        // tree of ranges, which have same begin and differents starting from some byte
+        std::unique_ptr<DiffCache> DiffRanges;
+
+        explicit Value(size_t offset) noexcept
             : Offset(offset)
         {
         }
-#pragma warning (suppress : 26495)
     };
 }
