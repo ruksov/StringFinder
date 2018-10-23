@@ -1,11 +1,11 @@
 #pragma once
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <memory>
 
-namespace sf::lib::diff_cache
+namespace sf::lib
 {
-    struct Key
+    struct DiffCacheKey
     {
         // offset of the first different byte
         size_t DiffOffset = 0;
@@ -14,21 +14,21 @@ namespace sf::lib::diff_cache
         char DiffByte = 0;
 
 
-        Key(size_t diffOffset, char diffByte) noexcept
+        DiffCacheKey(size_t diffOffset, char diffByte) noexcept
             : DiffOffset(diffOffset)
             , DiffByte(diffByte)
         {
         }
 
-        bool operator==(const Key& other) const noexcept
+        bool operator==(const DiffCacheKey& other) const noexcept
         {
             return (DiffOffset == other.DiffOffset && DiffByte == other.DiffByte);
         }
     };
 
-    struct KeyHash
+    struct DiffCacheKeyHash
     {
-        size_t operator()(Key const& k) const noexcept
+        size_t operator()(DiffCacheKey const& k) const noexcept
         {
             const size_t h1 = std::hash<char>()(k.DiffByte);
             const size_t h2 = k.DiffOffset;
@@ -36,20 +36,17 @@ namespace sf::lib::diff_cache
         }
     };
 
-    using DiffCache = std::unordered_map<Key, struct Value, KeyHash>;
-    using Iterator = DiffCache::iterator;
-    using ConstIterator = DiffCache::const_iterator;
-    using OffsetList = std::vector<size_t>;
+    using DiffCacheContainer = std::unordered_map<DiffCacheKey, struct DiffCacheValue, DiffCacheKeyHash>;
 
-    struct Value
+    struct DiffCacheValue
     {
         // offset of the first byte 
         size_t Offset = 0;
 
         // tree of ranges, which have same begin and differents starting from some byte
-        std::unique_ptr<DiffCache> DiffRanges;
+        std::unique_ptr<DiffCacheContainer> DiffRanges;
 
-        explicit Value(size_t offset) noexcept
+        explicit DiffCacheValue(size_t offset)
             : Offset(offset)
         {
         }

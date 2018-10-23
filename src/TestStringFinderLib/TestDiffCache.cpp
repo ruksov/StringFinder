@@ -1,154 +1,172 @@
 #include "stdafx.h"
-#include "Diffcache.h"
+#include "CacheFactory.h"
 
-using namespace sf::lib;
 using namespace testing;
+using namespace sf::lib;
 
-TEST(TestDiffCache, EmptyData)
+namespace
 {
-    std::string data = "";
-    diff_cache::IteratorList itList;
-    auto cache = diff_cache::Create(data, itList);
-    ASSERT_TRUE(cache->empty());
-}
-
-TEST(TestDiffCache, OneByteData)
-{
-    std::string data = "a";
-    diff_cache::IteratorList itList;
-    auto cache = diff_cache::Create(data, itList);
-
-    ASSERT_EQ(1, cache->size());
-    auto node = cache->begin();
-
-    ASSERT_EQ(data.at(0), node->first.Info.Byte);
-    ASSERT_EQ(0, node->first.Info.Offset);
-
-    ASSERT_EQ(0, node->second.Offset);
-    ASSERT_FALSE(node->second.DiffStrings);
-    ASSERT_FALSE(node->second.SubStrings);
-}
-
-TEST(TestDiffCache, TwoEqualBytes)
-{
-    std::string data = "aa";
-    diff_cache::IteratorList itList;
-    auto cache = diff_cache::Create(data, itList);
-
-    ASSERT_EQ(1, cache->size());
-    auto node = cache->begin();
-
-    ASSERT_EQ(data.at(0), node->first.Info.Byte);
-    ASSERT_EQ(0, node->first.Info.Offset);
-
-    ASSERT_EQ(0, node->second.Offset);
-    ASSERT_FALSE(node->second.DiffStrings);
-
-    ASSERT_EQ(1, node->second.SubStrings->size());
-    
-    const size_t subStringOffset = 1;
-    ASSERT_EQ(subStringOffset, node->second.SubStrings->at(0));
-}
-
-TEST(TestDiffCache, MultiEqualBytes)
-{
-    std::string data = "aaaaaaaa";
-    diff_cache::IteratorList itList;
-    auto cache = diff_cache::Create(data, itList);
-
-    ASSERT_EQ(1, cache->size());
-    auto node = cache->begin();
-
-    ASSERT_EQ(data.at(0), node->first.Info.Byte);
-    ASSERT_EQ(0, node->first.Info.Offset);
-
-    ASSERT_EQ(0, node->second.Offset);
-    ASSERT_FALSE(node->second.DiffStrings);
-
-    ASSERT_EQ(data.size() - 1, node->second.SubStrings->size());
-
-    size_t testOffset = 0;
-    for (auto offset : *node->second.SubStrings)
+    struct TestDiffCache : public Test
     {
-        ASSERT_EQ(++testOffset, offset);
-    }
-}
-
-TEST(TestDiffCache, TwoLevelDiffTree_CheckFirstLevel)
-{
-    std::string data = "aaaaBaaa";
-    diff_cache::IteratorList itList;
-    auto cache = diff_cache::Create(data, itList);
-
-    ASSERT_EQ(2, cache->size());
-
-    auto aTree = cache->find(diff_cache::Key(0, 'a'));
-    ASSERT_NE(cache->end(), aTree);
-
-    auto BTree = cache->find(diff_cache::Key(0, 'B'));
-    ASSERT_NE(cache->end(), BTree);
-
-    // check B-tree
-    ASSERT_EQ('B', BTree->first.Info.Byte);
-    ASSERT_EQ(0, BTree->first.Info.Offset);
-
-    ASSERT_EQ(data.find('B'), BTree->second.Offset);
-    ASSERT_FALSE(BTree->second.DiffStrings);
-    ASSERT_FALSE(BTree->second.SubStrings);
-
-    // check a-tree
-    ASSERT_EQ('a', aTree->first.Info.Byte);
-    ASSERT_EQ(0, aTree->first.Info.Offset);
-
-    ASSERT_EQ(0, aTree->second.Offset);
-
-    // check a-tree sub strings
-    ASSERT_EQ(3, aTree->second.SubStrings->size());
-
-    size_t testSubOffset = 5;
-    for (auto offset : *aTree->second.SubStrings)
-    {
-        ASSERT_EQ(testSubOffset++, offset);
-    }
-}
-
-TEST(TestDiffCache, TwoLevelDiffTree_CheckSecondLevel)
-{
-    std::string data = "aaaaBaaa";
-    diff_cache::IteratorList itList;
-    auto cache = diff_cache::Create(data, itList);
-
-    ASSERT_EQ(2, cache->size());
-
-    auto aTree = cache->find(diff_cache::Key(0, 'a'));
-    ASSERT_NE(cache->end(), aTree);
-
-    auto BTree = cache->find(diff_cache::Key(0, 'B'));
-    ASSERT_NE(cache->end(), BTree);
-
-    // check a-tree diff str tree
-    ASSERT_EQ(3, aTree->second.DiffStrings->size());
-
-    uint32_t Offset = 3;
-    size_t diffStrStartOffset = 1;
-    while (Offset != 0)
-    {
-        auto diffStr = aTree->second.DiffStrings->find(diff_cache::Key(Offset, 'B'));
-        ASSERT_NE(aTree->second.DiffStrings->end(), diffStr);
-
-        ASSERT_EQ(diffStrStartOffset, diffStr->second.Offset);
-        ASSERT_FALSE(diffStr->second.DiffStrings);
-        ASSERT_FALSE(diffStr->second.SubStrings);
-
-        size_t i = diffStr->second.Offset;
-        for (; i < diffStr->second.Offset + diffStr->first.Info.Offset; ++i)
+    public:
+        void CreateCache()
         {
-            ASSERT_EQ('a', data.at(i));
+            m_cache = CacheFactory(CacheType::DiffCache, m_data);
         }
 
-        ASSERT_EQ('B', data.at(i));
+        std::string GetDataSubStr(const Result& res)
+        {
+            return m_data.substr(res.NlOffset, res.MatchLen);
+        }
 
-        --Offset;
-        ++diffStrStartOffset;
-    }
+        std::string GetCmpDataSubStr(const Result& res)
+        {
+            return m_cmpData.substr(res.HsDataOffset, res.MatchLen);
+        }
+
+        bool CompareData(const Result& res)
+        {
+            return GetDataSubStr(res) == GetCmpDataSubStr(res);
+        }
+
+
+    protected:
+        Data m_data;
+        Data m_cmpData;
+        size_t m_cmpOffset = 0;
+        CachePtr m_cache;
+    };
+}
+
+TEST_F(TestDiffCache, EmptyCache)
+{
+    ASSERT_NO_THROW(CreateCache());
+    ASSERT_TRUE(m_cache->GetCacheData().empty());
+}
+
+TEST_F(TestDiffCache, GetCacheData)
+{
+    m_data = "some_data";
+    ASSERT_NO_THROW(CreateCache());
+    ASSERT_STREQ(m_data.data(), m_cache->GetCacheData().data());
+}
+
+TEST_F(TestDiffCache, Reset)
+{
+    m_data = "some_data";
+    ASSERT_NO_THROW(CreateCache());
+    ASSERT_STREQ(m_data.data(), m_cache->GetCacheData().data());
+
+    m_data = "another_data";
+    ASSERT_NO_THROW(m_cache->Reset(m_data));
+    ASSERT_STREQ(m_data.data(), m_cache->GetCacheData().data());
+}
+
+TEST_F(TestDiffCache, GetFirstResult_OutOfRange)
+{
+    m_data = "some_data";
+    ASSERT_NO_THROW(CreateCache());
+
+    m_cmpOffset = 1;
+    ASSERT_GT(m_cmpOffset, m_cmpData.size());
+    ASSERT_ANY_THROW(m_cache->GetFirstResult(m_cmpOffset, m_cmpData));
+}
+
+TEST_F(TestDiffCache, GetFirstResult_WithOneMatch)
+{
+    m_data = "some_data";
+    ASSERT_NO_THROW(CreateCache());
+
+    m_cmpOffset = 0;
+    m_cmpData = "some";
+    auto res = m_cache->GetFirstResult(m_cmpOffset, m_cmpData);
+    
+    ASSERT_TRUE(res);
+    ASSERT_STREQ("some", GetDataSubStr(res.value()).data());
+}
+
+TEST_F(TestDiffCache, GetFirstResult_WithTwoMatches)
+{
+    m_data = "some_data_some";
+    ASSERT_NO_THROW(CreateCache());
+
+    m_cmpOffset = 0;
+    m_cmpData = "some";
+    auto res = m_cache->GetFirstResult(m_cmpOffset, m_cmpData);
+
+    ASSERT_TRUE(res);
+    ASSERT_EQ(0, res->HsDataOffset);
+    ASSERT_STREQ("some", GetDataSubStr(res.value()).data());
+
+    // try repeat call
+    res = m_cache->GetFirstResult(m_cmpOffset, m_cmpData);
+
+    ASSERT_TRUE(res);
+    ASSERT_EQ(0, res->HsDataOffset);
+    ASSERT_STREQ("some", GetDataSubStr(res.value()).data());
+}
+
+TEST_F(TestDiffCache, GetNextResult_OutOfRange)
+{
+    m_data = "some_data";
+    ASSERT_NO_THROW(CreateCache());
+
+    // wrong cache offset
+    Result prevRes;
+    prevRes.NlOffset = 42;
+    ASSERT_GT(prevRes.NlOffset, m_data.size());
+    ASSERT_ANY_THROW(m_cache->GetNextResult(prevRes, m_data));
+
+    // wrong compare data offset
+    prevRes = Result();
+    prevRes.HsDataOffset = 42;
+    ASSERT_GT(prevRes.HsDataOffset, m_cmpData.size());
+    auto res = m_cache->GetNextResult(prevRes, m_data);
+    ASSERT_FALSE(res);
+
+    // wrong match length
+    prevRes = Result();
+    prevRes.MatchLen = 42;
+    ASSERT_GT(prevRes.HsDataOffset + prevRes.MatchLen, m_cmpData.size());
+    res = m_cache->GetNextResult(prevRes, m_data);
+    ASSERT_FALSE(res);
+}
+
+TEST_F(TestDiffCache, GetNextResult_FalseNextMatch)
+{
+    m_data = "some_data_some";
+    ASSERT_NO_THROW(CreateCache());
+
+    // get first match result
+    m_cmpData = "datadata";
+    auto res = m_cache->GetFirstResult(m_cmpOffset, m_cmpData);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(CompareData(res.value()));
+
+    // must return false result
+    ASSERT_FALSE(m_cache->GetNextResult(res.value(), m_cmpData));
+}
+
+TEST_F(TestDiffCache, GetNextResult_HasNextMatch)
+{
+    m_data = "some_data_datadata";
+    ASSERT_NO_THROW(CreateCache());
+
+    // get first match result
+    m_cmpData = "datadata";
+    auto res = m_cache->GetFirstResult(m_cmpOffset, m_cmpData);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(CompareData(res.value()));
+
+    // get next match result
+    auto nextRes = m_cache->GetNextResult(res.value(), m_cmpData);
+    ASSERT_TRUE(nextRes);
+    ASSERT_GT(nextRes->MatchLen, res->MatchLen);
+    ASSERT_EQ(m_cmpData.size(), nextRes->MatchLen);
+
+    ASSERT_TRUE(CompareData(nextRes.value()));
+    ASSERT_STREQ("datadata", GetDataSubStr(nextRes.value()).data());
+
+    // must return false result
+    ASSERT_FALSE(m_cache->GetNextResult(nextRes.value(), m_cmpData));
 }
