@@ -9,7 +9,5 @@ namespace sf::lib
         Unknown
     };
 
-    using CachePtr = std::unique_ptr<ICache>;
-
     CachePtr CacheFactory(CacheType cacheType, Data cacheData);
 }

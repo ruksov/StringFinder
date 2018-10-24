@@ -63,6 +63,12 @@
     <ClInclude Include="MatchResult.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ThreasholdMatcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatcherFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -91,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="IMatcher.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreasholdMatcher.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

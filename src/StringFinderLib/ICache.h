@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <memory>
 
 #include "Result.h"
 
@@ -37,4 +38,6 @@ namespace sf::lib
         virtual std::optional<CacheMatchResult> GetNextResult(const CacheMatchResult& prevRes, 
             const Data& cmpData) const = 0;
     };
+
+    using CachePtr = std::unique_ptr<ICache>;
 }

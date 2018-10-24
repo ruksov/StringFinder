@@ -180,6 +180,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CacheFactory.h" />
+    <ClInclude Include="MatcherFactory.h" />
+    <ClInclude Include="ThreasholdMatcher.h" />
     <ClInclude Include="ConsoleProgressBar.h" />
     <ClInclude Include="DiffCache.h" />
     <ClInclude Include="DoubleBuffer.h" />
@@ -198,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CacheFactory.cpp" />
+    <ClCompile Include="ThreasholdMatcher.cpp" />
     <ClCompile Include="ConsoleProgressBar.cpp" />
     <ClCompile Include="DiffCache.cpp" />
     <ClCompile Include="DoubleBuffer.cpp" />

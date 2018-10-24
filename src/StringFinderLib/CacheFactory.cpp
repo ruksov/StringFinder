@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CacheFactory.h"
-#include "DiffCache.h"
 #include "Exceptions.h"
+#include "DiffCache.h"
 
 namespace sf::lib
 {
@@ -11,13 +11,13 @@ namespace sf::lib
 
         switch (cacheType)
         {
-        case sf::lib::CacheType::DiffCache:
+        case CacheType::DiffCache:
             cache = std::make_unique<DiffCache>(std::move(cacheData));
             break;
 
-        case sf::lib::CacheType::Unknown:
+        case CacheType::Unknown:
         default:
-            THROW("Faile to create cache. Unknown cache type.")
+            THROW("Failed to create cache. Unknown cache type.")
             break;
         }
 

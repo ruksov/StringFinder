@@ -1,5 +1,7 @@
 #pragma once
 #include <functional>
+#include <memory>
+#include <vector>
 
 #include "MatchResult.h"
 
@@ -24,4 +26,6 @@ namespace sf::lib
     private:
         std::vector<ResultHandlerFnPtr> m_handlers;
     };
+
+    using MatcherPtr = std::unique_ptr<IMatcher>;
 }

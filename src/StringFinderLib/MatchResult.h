@@ -13,13 +13,6 @@ namespace sf::lib
         size_t HsDataOffset = 0;
         size_t MatchLen = 0;
 
-        MatchResult& operator=(const CacheMatchResult& cacheMatchRes)
-        {
-            NlOffset = cacheMatchRes.CacheOffset;
-            HsDataOffset = cacheMatchRes.CmpDataOffset;
-            MatchLen = cacheMatchRes.MatchLen;
-        }
-
         explicit MatchResult(size_t hsDataIndex)
             : HsDataIndex(hsDataIndex)
         {
@@ -31,6 +24,20 @@ namespace sf::lib
             , MatchLen(cacheMatchRes.MatchLen)
             , HsDataIndex(hsDataIndex)
         {
+        }
+
+        MatchResult& operator=(const CacheMatchResult& cacheMatchRes)
+        {
+            NlOffset = cacheMatchRes.CacheOffset;
+            HsDataOffset = cacheMatchRes.CmpDataOffset;
+            MatchLen = cacheMatchRes.MatchLen;
+
+            return *this;
+        }
+
+        CacheMatchResult GetCacheMatchRes() const
+        {
+            return CacheMatchResult(NlOffset, HsDataOffset, MatchLen);
         }
     };
 }
