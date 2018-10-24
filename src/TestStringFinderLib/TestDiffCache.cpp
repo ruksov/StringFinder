@@ -14,17 +14,17 @@ namespace
             m_cache = CacheFactory(CacheType::DiffCache, m_data);
         }
 
-        std::string GetDataSubStr(const Result& res)
+        std::string GetDataSubStr(const CacheMatchResult& res)
         {
-            return m_data.substr(res.NlOffset, res.MatchLen);
+            return m_data.substr(res.CacheOffset, res.MatchLen);
         }
 
-        std::string GetCmpDataSubStr(const Result& res)
+        std::string GetCmpDataSubStr(const CacheMatchResult& res)
         {
-            return m_cmpData.substr(res.HsDataOffset, res.MatchLen);
+            return m_cmpData.substr(res.CmpDataOffset, res.MatchLen);
         }
 
-        bool CompareData(const Result& res)
+        bool CompareData(const CacheMatchResult& res)
         {
             return GetDataSubStr(res) == GetCmpDataSubStr(res);
         }
@@ -95,40 +95,39 @@ TEST_F(TestDiffCache, GetFirstResult_WithTwoMatches)
     auto res = m_cache->GetFirstResult(m_cmpOffset, m_cmpData);
 
     ASSERT_TRUE(res);
-    ASSERT_EQ(0, res->HsDataOffset);
+    ASSERT_EQ(0, res->CmpDataOffset);
     ASSERT_STREQ("some", GetDataSubStr(res.value()).data());
 
     // try repeat call
     res = m_cache->GetFirstResult(m_cmpOffset, m_cmpData);
 
     ASSERT_TRUE(res);
-    ASSERT_EQ(0, res->HsDataOffset);
+    ASSERT_EQ(0, res->CmpDataOffset);
     ASSERT_STREQ("some", GetDataSubStr(res.value()).data());
 }
 
 TEST_F(TestDiffCache, GetNextResult_OutOfRange)
 {
     m_data = "some_data";
+    m_cmpData = "data";
     ASSERT_NO_THROW(CreateCache());
 
     // wrong cache offset
-    Result prevRes;
-    prevRes.NlOffset = 42;
-    ASSERT_GT(prevRes.NlOffset, m_data.size());
-    ASSERT_ANY_THROW(m_cache->GetNextResult(prevRes, m_data));
+    CacheMatchResult prevRes(42, 0, 0);
+    ASSERT_GT(prevRes.CacheOffset, m_data.size());
+    ASSERT_ANY_THROW(m_cache->GetNextResult(prevRes, m_cmpData));
 
     // wrong compare data offset
-    prevRes = Result();
-    prevRes.HsDataOffset = 42;
-    ASSERT_GT(prevRes.HsDataOffset, m_cmpData.size());
-    auto res = m_cache->GetNextResult(prevRes, m_data);
+    prevRes = CacheMatchResult(0, 42, 0);
+    ASSERT_GT(prevRes.CmpDataOffset, m_cmpData.size());
+    auto res = m_cache->GetNextResult(prevRes, m_cmpData);
     ASSERT_FALSE(res);
 
     // wrong match length
-    prevRes = Result();
+    prevRes = CacheMatchResult(0, 0, 42);
     prevRes.MatchLen = 42;
-    ASSERT_GT(prevRes.HsDataOffset + prevRes.MatchLen, m_cmpData.size());
-    res = m_cache->GetNextResult(prevRes, m_data);
+    ASSERT_GT(prevRes.CmpDataOffset + prevRes.MatchLen, m_cmpData.size());
+    res = m_cache->GetNextResult(prevRes, m_cmpData);
     ASSERT_FALSE(res);
 }
 

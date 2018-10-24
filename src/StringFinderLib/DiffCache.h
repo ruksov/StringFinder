@@ -15,14 +15,16 @@ namespace sf::lib
         void Reset(Data cacheData) override;
 
         // return first possible match result with passed data
-        std::optional<Result> GetFirstResult(size_t cmpDataOffset, const Data& cmpData) const override;
+        std::optional<CacheMatchResult> GetFirstResult(size_t cmpDataOffset, 
+            const Data& cmpData) const override;
 
         // return next possible match result with passed data after previous result
-        std::optional<Result> GetNextResult(const Result& prevRes, const Data& cmpData) const override;
+        std::optional<CacheMatchResult> GetNextResult(const CacheMatchResult& prevRes, 
+            const Data& cmpData) const override;
 
     private:
         void ConstructCache();
-        std::optional<Result> CompareWithCacheData(size_t cacheDataOffset, 
+        std::optional<CacheMatchResult> CompareWithCacheData(size_t cacheDataOffset,
             size_t cmpDataOffset, 
             const Data& cmpData, 
             size_t cachedMatchLen = 0) const;

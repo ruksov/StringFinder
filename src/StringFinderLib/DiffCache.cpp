@@ -21,7 +21,8 @@ namespace sf::lib
         ConstructCache();
     }
 
-    std::optional<Result> DiffCache::GetFirstResult(size_t cmpDataOffset, const Data & cmpData) const
+    std::optional<CacheMatchResult> DiffCache::GetFirstResult(size_t cmpDataOffset, 
+        const Data & cmpData) const
     {
         auto it = m_cache.find(DiffCacheKey(0, cmpData.at(cmpDataOffset)));
         if (it == m_cache.end())
@@ -32,24 +33,25 @@ namespace sf::lib
         return CompareWithCacheData(it->second.Offset, cmpDataOffset, cmpData);
     }
 
-    std::optional<Result> DiffCache::GetNextResult(const Result & prevRes, const Data & cmpData) const
+    std::optional<CacheMatchResult> DiffCache::GetNextResult(const CacheMatchResult & prevRes, 
+        const Data & cmpData) const
     {
-        auto prevIt = m_iteratorList.at(prevRes.NlOffset);
+        auto prevIt = m_iteratorList.at(prevRes.CacheOffset);
 
-        if (prevIt->second.Offset != prevRes.NlOffset   // range from prev result is sub range, which placed before
+        if (prevIt->second.Offset != prevRes.CacheOffset   // range from prev result is sub range, which placed before
             || !prevIt->second.DiffRanges)              // range from prev result has not any diff sub ranges
         {
             return std::nullopt;
         }
 
         auto it = prevIt->second.DiffRanges->find(
-            DiffCacheKey(prevRes.MatchLen, cmpData.at(prevRes.HsDataOffset + prevRes.MatchLen)));
+            DiffCacheKey(prevRes.MatchLen, cmpData.at(prevRes.CmpDataOffset + prevRes.MatchLen)));
         if (it == prevIt->second.DiffRanges->end())
         {
             return std::nullopt;
         }
 
-        return CompareWithCacheData(it->second.Offset, prevRes.HsDataOffset, cmpData, prevRes.MatchLen);
+        return CompareWithCacheData(it->second.Offset, prevRes.CmpDataOffset, cmpData, prevRes.MatchLen);
     }
 
     void DiffCache::ConstructCache()
@@ -108,12 +110,12 @@ namespace sf::lib
         assert(m_cacheData.size() == m_iteratorList.size());
     }
 
-    std::optional<Result> DiffCache::CompareWithCacheData(size_t cacheDataOffset,
+    std::optional<CacheMatchResult> DiffCache::CompareWithCacheData(size_t cacheDataOffset,
         size_t cmpDataOffset,
         const Data& cmpData,
         size_t cachedMatchLen) const
     {
-        Result res(cmpDataOffset, cacheDataOffset, cachedMatchLen);
+        CacheMatchResult res(cacheDataOffset, cmpDataOffset, cachedMatchLen);
 
         auto isFinishCompare = [cacheDataOffset, &cacheData = m_cacheData, cmpDataOffset, &cmpData, &res]()
         {
