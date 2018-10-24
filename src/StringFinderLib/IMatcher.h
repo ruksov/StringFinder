@@ -13,7 +13,7 @@ namespace sf::lib
     public:
         virtual ~IMatcher() = default;
 
-        virtual void Match(size_t hsOffset, const Data& hsData) = 0;
+        virtual size_t Match(size_t hsOffset, size_t hsDataIndex, const Data& hsData) = 0;
 
         void AddResultHandler(ResultHandlerFnPtr fn);
         void RemoveResultHandler(ResultHandlerFnPtr fn);
