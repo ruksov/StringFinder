@@ -3,15 +3,13 @@
 #include "Exceptions.h"
 #include "ThreasholdMatcher.h"
 
-namespace sf
+namespace sf::lib
 {
     enum class MatcherType
     {
         ThreasholdMatcher = 0,
         Unknown
     };
-
-    using MatcherPtr = lib::MatcherPtr;
 
     template<typename ...CtorArgs>
     MatcherPtr MatcherFactory(MatcherType matcherType, CtorArgs&&... ctorArgs)
@@ -21,7 +19,7 @@ namespace sf
         switch (matcherType)
         {
         case MatcherType::ThreasholdMatcher:
-            matcher = std::make_unique<lib::ThreasholdMatcher>(std::forward<CtorArgs>(ctorArgs)...);
+            matcher = std::make_unique<ThreasholdMatcher>(std::forward<CtorArgs>(ctorArgs)...);
             break;
 
         case MatcherType::Unknown:

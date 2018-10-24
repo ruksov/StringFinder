@@ -4,7 +4,9 @@
 #include "FileReader.h"
 #include "Exceptions.h"
 #include "Log.h"
-#include "Matcher.h"
+
+#include "CacheFactory.h"
+#include "MatcherFactory.h"
 
 #include "ProgressBarCollection.h"
 #include "ConsoleProgressBar.h"
@@ -17,25 +19,28 @@ namespace sf
         m_resultLog.open("result.log", std::ios::out);
 
         LOG_INFO("Run String Finder");
-        // Compute needle size
-        size_t needleSize = 0;
-        {
-            std::ifstream file;
-            file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-            file.open(needlePath, std::ios::in | std::ios::binary | std::ios::ate);
-            needleSize = file.tellg();
-        }
-
-        LOG_INFO("Initialize matcher");
-        //m_matcher = std::make_unique<lib::LinearMatcher>(threshold, std::move(needlePath));
-        lib::Matcher matcher(threshold, std::move(needlePath), [this](lib::Result res) { PrintResult(res); });
-        LOG_INFO("Finish initialize matcher");;
+        // Read needle
+        std::ifstream file;
+        file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        file.open(needlePath, std::ios::in | std::ios::binary);
+        lib::Data needleData((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
         LOG_INFO("Initialize reader for haystack buffer");
-        auto haystackReader = std::make_unique<lib::FileReader>(std::move(haystackPath), needleSize);
+        auto haystackReader = std::make_unique<lib::FileReader>(std::move(haystackPath), needleData.size());
 
         LOG_INFO("Initialize haystack buffer");
         m_haystack = std::make_unique<lib::DoubleBuffer>(std::move(haystackReader));
+
+        LOG_INFO("Initialize matcher");
+        auto matcher = lib::MatcherFactory(lib::MatcherType::ThreasholdMatcher
+            , threshold
+            , lib::CacheFactory(lib::CacheType::DiffCache, std::move(needleData)));
+        LOG_INFO("Finish initialize matcher");;
+
+        // add result handler to matcher
+        auto resultHandler = std::make_shared<lib::ResultHandlerFn>();
+        *resultHandler = [this](const lib::MatchResult& res) { PrintResult(res); };
+        matcher->AddResultHandler(resultHandler);
 
         lib::ProgressBarCollection progressView(m_haystack->GetDataCount());
         progressView.AddCallback("console", lib::ConsoleProgressBar);
@@ -49,7 +54,7 @@ namespace sf
             const auto hsDataSize = hsData.get().size();
             for (size_t i = 0; i < hsDataSize;)
             {
-                size_t matchLen = matcher.Match(hsIndex, i, hsData);
+                size_t matchLen = matcher->Match(i, hsIndex, hsData);
                 i += matchLen == 0 ? 1 : matchLen;
             }
 
@@ -58,7 +63,7 @@ namespace sf
         }
         LOG_INFO("String Finder finished search");
     }
-    void StringFinder::PrintResult(lib::Result res)
+    void StringFinder::PrintResult(const lib::MatchResult& res)
     {
         LOG_DEBUG("Found new match result:\n"
             << "\tHsOffset = " << res.HsDataOffset + (res.HsDataIndex * m_haystack->GetDataSize()) << '\n'

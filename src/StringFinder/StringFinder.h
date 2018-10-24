@@ -1,6 +1,6 @@
 #pragma once
 #include "DoubleBuffer.h"
-#include "LinearMatcher.h"
+#include "MatchResult.h"
 
 namespace sf
 {
@@ -9,11 +9,10 @@ namespace sf
     public:
         void Run(size_t threshold, std::string needlePath, std::string haystackPath);
 
-        void PrintResult(lib::Result res);
+        void PrintResult(const lib::MatchResult& res);
 
     private:
         std::ofstream m_resultLog;
-        std::unique_ptr<lib::LinearMatcher> m_matcher;
         std::unique_ptr<lib::DoubleBuffer> m_haystack;
     };
 }

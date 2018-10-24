@@ -26,22 +26,31 @@ namespace sf::lib
         }
 
         size_t matchLen = 0;
-        if (maxRes.MatchLen > m_threashold)
-        {
-            matchLen = maxRes.MatchLen;
 
-            if (maxRes.HsDataOffset + maxRes.MatchLen < hsData.size())
+        if (maxRes.HsDataIndex == hsDataIndex 
+            && maxRes.HsDataOffset + maxRes.MatchLen == hsData.size())
+        {
+            m_matchResFromPrevChunck = maxRes;
+            matchLen = maxRes.MatchLen;
+        }
+        else if (maxRes.MatchLen >= m_threashold)
+        {
+            // notify all observers 
+            // we find match result
+            NotifyAll(maxRes);
+
+            if (maxRes.HsDataIndex != hsDataIndex)
             {
-                // notify all observers 
-                // we find match result
-                NotifyAll(maxRes);
+                // find result from previous chunk
+                // so we need to fix match length
+                matchLen = maxRes.HsDataOffset + maxRes.MatchLen - m_cache->GetCacheData().size();
             }
             else
             {
-                m_matchResFromPrevChunck = maxRes;
+                matchLen = maxRes.MatchLen;
             }
         }
-
+ 
         return matchLen;
     }
 
@@ -61,15 +70,27 @@ namespace sf::lib
 
     MatchResult ThreasholdMatcher::GetMaxResult(const MatchResult & cachedMatchRes, const Data & hsData)
     {
-        MatchResult maxRes(cachedMatchRes.HsDataIndex);
+        MatchResult maxRes = cachedMatchRes;
 
-        auto cacheRes = m_cache->GetNextResult(cachedMatchRes.GetCacheMatchRes(), hsData);
+        // inner cache search next match result based on previous data chunck,
+        // so we subtract matchLen to create "virtual" representation of previous data chunck
+        maxRes.HsDataOffset = 0;
+        maxRes.HsDataOffset -= maxRes.MatchLen;
+
+        // try to match more bytes in current needle range
+        auto& needleData = m_cache->GetCacheData();
+        for (; maxRes.NlOffset + maxRes.MatchLen < needleData.size()
+            && needleData.at(maxRes.NlOffset + maxRes.MatchLen) == hsData.at(maxRes.HsDataOffset + maxRes.MatchLen)
+            ; ++maxRes.MatchLen);
+        
+        auto cacheRes = m_cache->GetNextResult(maxRes.GetCacheMatchRes(), hsData);
         while (cacheRes)
         {
             maxRes = cacheRes.value();
             cacheRes = m_cache->GetNextResult(cacheRes.value(), hsData);
         }
 
+        maxRes.HsDataOffset = cachedMatchRes.HsDataOffset;
         return maxRes;
     }
 }
