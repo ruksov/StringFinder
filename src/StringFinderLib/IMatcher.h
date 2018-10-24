@@ -21,6 +21,7 @@ namespace sf::lib
         void RemoveResultHandler(ResultHandlerFnPtr fn);
         bool HasResultHandler(ResultHandlerFnPtr fn);
 
+    protected:
         void NotifyAll(const MatchResult& matchRes);
 
     private:

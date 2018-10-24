@@ -15,7 +15,7 @@ namespace sf::lib
             size_t hsDataIndex,
             const Data& hsData);
 
-        MatchResult GetMaxResult(const MatchResult & cachedMatchRes, const Data & hsData);
+        MatchResult GetMaxResult_FromBegin(const MatchResult & cachedMatchRes, const Data & hsData);
 
     private:
         size_t m_threashold = 0;

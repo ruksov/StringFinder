@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Caches">
+      <UniqueIdentifier>{7e441efe-7874-4e24-bc4f-6cb5e7655ecb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mathcers">
+      <UniqueIdentifier>{99b182ed-7912-4e47-87e7-b89b01336be7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Buffers">
+      <UniqueIdentifier>{0ee38ad9-d929-4c92-9365-a4264f8f2e0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ProgressBars">
+      <UniqueIdentifier>{4f1ac073-2c74-494d-96bf-6942bb32c57a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -24,82 +36,82 @@
     <ClInclude Include="Exceptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Log.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DoubleBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Result.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DiffCacheTypes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="CacheFactory.h">
+      <Filter>Caches</Filter>
     </ClInclude>
     <ClInclude Include="DiffCache.h">
-      <Filter>Header Files</Filter>
+      <Filter>Caches</Filter>
     </ClInclude>
-    <ClInclude Include="ConsoleProgressBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProgressBarCollection.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="DiffCacheTypes.h">
+      <Filter>Caches</Filter>
     </ClInclude>
     <ClInclude Include="ICache.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CacheFactory.h">
-      <Filter>Header Files</Filter>
+      <Filter>Caches</Filter>
     </ClInclude>
     <ClInclude Include="IMatcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MatchResult.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreasholdMatcher.h">
-      <Filter>Header Files</Filter>
+      <Filter>Mathcers</Filter>
     </ClInclude>
     <ClInclude Include="MatcherFactory.h">
-      <Filter>Header Files</Filter>
+      <Filter>Mathcers</Filter>
+    </ClInclude>
+    <ClInclude Include="MatchResult.h">
+      <Filter>Mathcers</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreasholdMatcher.h">
+      <Filter>Mathcers</Filter>
+    </ClInclude>
+    <ClInclude Include="FileReader.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="DoubleBuffer.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="IReader.h">
+      <Filter>Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressBarCollection.h">
+      <Filter>ProgressBars</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleProgressBar.h">
+      <Filter>ProgressBars</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileReader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DoubleBuffer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="CacheFactory.cpp">
+      <Filter>Caches</Filter>
     </ClCompile>
     <ClCompile Include="DiffCache.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConsoleProgressBar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProgressBarCollection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CacheFactory.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Caches</Filter>
     </ClCompile>
     <ClCompile Include="IMatcher.cpp">
-      <Filter>Header Files</Filter>
+      <Filter>Mathcers</Filter>
     </ClCompile>
     <ClCompile Include="ThreasholdMatcher.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Mathcers</Filter>
+    </ClCompile>
+    <ClCompile Include="DoubleBuffer.cpp">
+      <Filter>Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="FileReader.cpp">
+      <Filter>Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleProgressBar.cpp">
+      <Filter>ProgressBars</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBarCollection.cpp">
+      <Filter>ProgressBars</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

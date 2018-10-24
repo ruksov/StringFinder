@@ -1,5 +1,4 @@
 #pragma once
-#include "DoubleBuffer.h"
 #include "MatchResult.h"
 
 namespace sf
@@ -13,6 +12,6 @@ namespace sf
 
     private:
         std::ofstream m_resultLog;
-        std::unique_ptr<lib::DoubleBuffer> m_haystack;
+        size_t m_chunckSize = 0;
     };
 }
