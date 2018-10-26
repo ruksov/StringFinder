@@ -24,6 +24,11 @@ namespace sf::lib
     std::optional<CacheMatchResult> DiffCache::GetFirstResult(size_t cmpDataOffset, 
         const Data & cmpData) const
     {
+        if (cmpDataOffset >= cmpData.size())
+        {
+            return std::nullopt;
+        }
+
         auto it = m_cache.find(DiffCacheKey(0, cmpData.at(cmpDataOffset)));
         if (it == m_cache.end())
         {
