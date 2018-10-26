@@ -16,14 +16,14 @@
     <Filter Include="Caches">
       <UniqueIdentifier>{7e441efe-7874-4e24-bc4f-6cb5e7655ecb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Mathcers">
-      <UniqueIdentifier>{99b182ed-7912-4e47-87e7-b89b01336be7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Buffers">
       <UniqueIdentifier>{0ee38ad9-d929-4c92-9365-a4264f8f2e0c}</UniqueIdentifier>
     </Filter>
     <Filter Include="ProgressBars">
       <UniqueIdentifier>{4f1ac073-2c74-494d-96bf-6942bb32c57a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Matchers">
+      <UniqueIdentifier>{99b182ed-7912-4e47-87e7-b89b01336be7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -55,16 +55,16 @@
       <Filter>Caches</Filter>
     </ClInclude>
     <ClInclude Include="IMatcher.h">
-      <Filter>Mathcers</Filter>
+      <Filter>Matchers</Filter>
     </ClInclude>
     <ClInclude Include="MatcherFactory.h">
-      <Filter>Mathcers</Filter>
+      <Filter>Matchers</Filter>
     </ClInclude>
     <ClInclude Include="MatchResult.h">
-      <Filter>Mathcers</Filter>
+      <Filter>Matchers</Filter>
     </ClInclude>
     <ClInclude Include="ThreasholdMatcher.h">
-      <Filter>Mathcers</Filter>
+      <Filter>Matchers</Filter>
     </ClInclude>
     <ClInclude Include="FileReader.h">
       <Filter>Buffers</Filter>
@@ -96,10 +96,10 @@
       <Filter>Caches</Filter>
     </ClCompile>
     <ClCompile Include="IMatcher.cpp">
-      <Filter>Mathcers</Filter>
+      <Filter>Matchers</Filter>
     </ClCompile>
     <ClCompile Include="ThreasholdMatcher.cpp">
-      <Filter>Mathcers</Filter>
+      <Filter>Matchers</Filter>
     </ClCompile>
     <ClCompile Include="DoubleBuffer.cpp">
       <Filter>Buffers</Filter>

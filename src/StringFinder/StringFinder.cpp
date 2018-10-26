@@ -74,7 +74,7 @@ namespace sf
     void StringFinder::PrintResult(const lib::MatchResult& res)
     {
         LOG_DEBUG("Found new match result:\n"
-            << "\tHsOffset = " << res.HsDataOffset + (res.HsDataIndex * m_haystack->GetDataSize()) << '\n'
+            << "\tHsOffset = " << res.HsDataOffset + (res.HsDataIndex * m_chunckSize) << '\n'
             << "\tNlOffset = " << res.NlOffset << '\n'
             << "\tMatchLen = " << res.MatchLen << '\n');
         m_resultLog << "sequence of length = " << res.MatchLen

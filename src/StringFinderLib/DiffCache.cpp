@@ -36,23 +36,37 @@ namespace sf::lib
     std::optional<CacheMatchResult> DiffCache::GetNextResult(const CacheMatchResult & prevRes, 
         const Data & cmpData) const
     {
-        auto prevIt = m_iteratorList.at(prevRes.CacheOffset);
+        // try to update previous result with new cmp data
+        auto updatedPrevRes = CompareWithCacheData(prevRes.CacheOffset
+            , prevRes.CmpDataOffset
+            , cmpData
+            , prevRes.MatchLen);
 
-        if (prevIt->second.Offset != prevRes.CacheOffset                    // range from prev result is sub range, which placed before
-            || !prevIt->second.DiffRanges                                   // range from prev result has not any diff sub ranges
-            || prevRes.CmpDataOffset + prevRes.MatchLen >= cmpData.size())  // end of cmp data range            
+        if (!updatedPrevRes)
+        {
+            updatedPrevRes = prevRes;
+        }
+
+        auto prevIt = m_iteratorList.at(updatedPrevRes->CacheOffset);
+
+        if (prevIt->second.Offset != updatedPrevRes->CacheOffset    // range from prev result is sub range, which placed before
+            || !prevIt->second.DiffRanges                           // range from prev result has not any diff sub ranges
+            || updatedPrevRes->CmpDataOffset                        // end of cmp data range
+                + updatedPrevRes->MatchLen >= cmpData.size())                   
         {
             return std::nullopt;
         }
 
         auto it = prevIt->second.DiffRanges->find(
-            DiffCacheKey(prevRes.MatchLen, cmpData.at(prevRes.CmpDataOffset + prevRes.MatchLen)));
+            DiffCacheKey(updatedPrevRes->MatchLen
+                , cmpData.at(updatedPrevRes->CmpDataOffset + updatedPrevRes->MatchLen)));
+
         if (it == prevIt->second.DiffRanges->end())
         {
             return std::nullopt;
         }
 
-        return CompareWithCacheData(it->second.Offset, prevRes.CmpDataOffset, cmpData, prevRes.MatchLen);
+        return CompareWithCacheData(it->second.Offset, updatedPrevRes->CmpDataOffset, cmpData, updatedPrevRes->MatchLen);
     }
 
     void DiffCache::ConstructCache()

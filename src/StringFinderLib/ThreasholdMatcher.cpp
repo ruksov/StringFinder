@@ -79,13 +79,6 @@ namespace sf::lib
         // so we subtract matchLen to create "virtual" representation of previous data chunck
         maxRes.HsDataOffset = 0;
         maxRes.HsDataOffset -= maxRes.MatchLen;
-
-        // try to match more bytes in current needle range
-        auto& needleData = m_cache->GetCacheData();
-        for (; maxRes.NlOffset + maxRes.MatchLen < needleData.size()
-            && maxRes.HsDataOffset + maxRes.MatchLen < hsData.size()
-            && needleData.at(maxRes.NlOffset + maxRes.MatchLen) == hsData.at(maxRes.HsDataOffset + maxRes.MatchLen)
-            ; ++maxRes.MatchLen);
         
         auto cacheRes = m_cache->GetNextResult(maxRes.GetCacheMatchRes(), hsData);
         while (cacheRes)
