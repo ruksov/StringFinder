@@ -47,19 +47,18 @@ namespace sf::lib
             , cmpData
             , prevRes.MatchLen);
 
+        auto prevIt = m_iteratorList.at(prevRes.CacheOffset);
+
+        if (prevIt->second.Offset != updatedPrevRes->CacheOffset            // range from prev result is sub range, which placed before
+            || !prevIt->second.DiffRanges                                   // range from prev result has not any diff sub ranges
+            || prevRes.CmpDataOffset + prevRes.MatchLen >= cmpData.size())  // end of cmp data range
+        {
+            return updatedPrevRes;
+        }
+
         if (!updatedPrevRes)
         {
             updatedPrevRes = prevRes;
-        }
-
-        auto prevIt = m_iteratorList.at(updatedPrevRes->CacheOffset);
-
-        if (prevIt->second.Offset != updatedPrevRes->CacheOffset    // range from prev result is sub range, which placed before
-            || !prevIt->second.DiffRanges                           // range from prev result has not any diff sub ranges
-            || updatedPrevRes->CmpDataOffset                        // end of cmp data range
-                + updatedPrevRes->MatchLen >= cmpData.size())                   
-        {
-            return std::nullopt;
         }
 
         auto it = prevIt->second.DiffRanges->find(
