@@ -35,7 +35,7 @@ namespace sf::lib
             const Data& cmpData) const = 0;
 
         // return next possible match result with passed data after previous result
-        virtual std::optional<CacheMatchResult> GetNextResult(const CacheMatchResult& prevRes, 
+        virtual std::optional<CacheMatchResult> GetNextResult(CacheMatchResult prevRes, 
             const Data& cmpData) const = 0;
     };
 

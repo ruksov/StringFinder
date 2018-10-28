@@ -56,13 +56,12 @@ namespace sf
             const auto hsDataSize = hsData.get().size();
            
             LOG_DEBUG("Start handle haystack data #" << hsIndex);
+            progressView.OnProgressChange(hsIndex);
             for (size_t i = 0; i < hsDataSize;)
             {
                 size_t matchLen = matcher->Match(i, hsIndex, hsData);
                 i += matchLen == 0 ? 1 : matchLen;
             }
-
-            progressView.OnProgressChange(hsIndex);
             hsData = haystack->GetNext();
         }
 

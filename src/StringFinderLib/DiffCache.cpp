@@ -35,42 +35,41 @@ namespace sf::lib
             return std::nullopt;
         }
 
-        return CompareWithCacheData(it->second.Offset, cmpDataOffset, cmpData);
+        return CompareWithCacheData(it->second.Offset, cmpDataOffset, cmpData, 1);
     }
 
-    std::optional<CacheMatchResult> DiffCache::GetNextResult(const CacheMatchResult & prevRes, 
+    std::optional<CacheMatchResult> DiffCache::GetNextResult(CacheMatchResult prevRes, 
         const Data & cmpData) const
     {
         // try to update previous result with new cmp data
-        auto updatedPrevRes = CompareWithCacheData(prevRes.CacheOffset
+        prevRes = CompareWithCacheData(prevRes.CacheOffset
             , prevRes.CmpDataOffset
             , cmpData
             , prevRes.MatchLen);
 
         auto prevIt = m_iteratorList.at(prevRes.CacheOffset);
 
-        if (prevIt->second.Offset != updatedPrevRes->CacheOffset            // range from prev result is sub range, which placed before
+        if (prevIt->second.Offset != prevRes.CacheOffset            // range from prev result is sub range, which placed before
             || !prevIt->second.DiffRanges                                   // range from prev result has not any diff sub ranges
             || prevRes.CmpDataOffset + prevRes.MatchLen >= cmpData.size())  // end of cmp data range
         {
-            return updatedPrevRes;
-        }
-
-        if (!updatedPrevRes)
-        {
-            updatedPrevRes = prevRes;
+            return std::nullopt;
         }
 
         auto it = prevIt->second.DiffRanges->find(
-            DiffCacheKey(updatedPrevRes->MatchLen
-                , cmpData.at(updatedPrevRes->CmpDataOffset + updatedPrevRes->MatchLen)));
+            DiffCacheKey(prevRes.MatchLen
+                , cmpData.at(prevRes.CmpDataOffset + prevRes.MatchLen)));
 
         if (it == prevIt->second.DiffRanges->end())
         {
             return std::nullopt;
         }
 
-        return CompareWithCacheData(it->second.Offset, updatedPrevRes->CmpDataOffset, cmpData, updatedPrevRes->MatchLen);
+        //++prevRes.MatchLen;
+        return CompareWithCacheData(it->second.Offset
+            , prevRes.CmpDataOffset
+            , cmpData
+            , prevRes.MatchLen + 1);
     }
 
     void DiffCache::ConstructCache()
@@ -94,7 +93,8 @@ namespace sf::lib
                 size_t parentCmpOffset = parentValue.Offset + parentKey.DiffOffset;
 
                 for (
-                    ; childCmpOffset < dataSize && m_cacheData.at(childCmpOffset) == m_cacheData.at(parentCmpOffset)
+                    ; childCmpOffset < dataSize 
+                    && m_cacheData.at(childCmpOffset) == m_cacheData.at(parentCmpOffset)
                     ; ++childCmpOffset, ++parentCmpOffset);
 
                 // these data ranges must be equal:
@@ -129,23 +129,19 @@ namespace sf::lib
         assert(m_cacheData.size() == m_iteratorList.size());
     }
 
-    std::optional<CacheMatchResult> DiffCache::CompareWithCacheData(size_t cacheDataOffset,
+    CacheMatchResult DiffCache::CompareWithCacheData(size_t cacheDataOffset,
         size_t cmpDataOffset,
         const Data& cmpData,
         size_t cachedMatchLen) const
     {
         CacheMatchResult res(cacheDataOffset, cmpDataOffset, cachedMatchLen);
 
-        auto isFinishCompare = [cacheDataOffset, &cacheData = m_cacheData, cmpDataOffset, &cmpData, &res]()
-        {
-            return cacheDataOffset + res.MatchLen < cacheData.size()
-                && cmpDataOffset + res.MatchLen < cmpData.size()
-                && cacheData.at(cacheDataOffset + res.MatchLen) == cmpData.at(cmpDataOffset + res.MatchLen);
-        };
+        for (; cacheDataOffset + res.MatchLen < m_cacheData.size()
+            && cmpDataOffset + res.MatchLen < cmpData.size()
+            && m_cacheData.at(cacheDataOffset + res.MatchLen) == cmpData.at(cmpDataOffset + res.MatchLen)
+            ; ++res.MatchLen);
 
-        for (; isFinishCompare(); ++res.MatchLen);
-
-        return res.MatchLen == 0 || res.MatchLen == cachedMatchLen ? std::nullopt : std::make_optional(res);
+        return res;
     }
 }
 

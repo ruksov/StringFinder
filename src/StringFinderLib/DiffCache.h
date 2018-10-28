@@ -19,12 +19,12 @@ namespace sf::lib
             const Data& cmpData) const override;
 
         // return next possible match result with passed data after previous result
-        std::optional<CacheMatchResult> GetNextResult(const CacheMatchResult& prevRes, 
+        std::optional<CacheMatchResult> GetNextResult(CacheMatchResult prevRes, 
             const Data& cmpData) const override;
 
     private:
         void ConstructCache();
-        std::optional<CacheMatchResult> CompareWithCacheData(size_t cacheDataOffset,
+        CacheMatchResult CompareWithCacheData(size_t cacheDataOffset,
             size_t cmpDataOffset, 
             const Data& cmpData, 
             size_t cachedMatchLen = 0) const;

@@ -69,7 +69,7 @@ TEST_F(TestDiffCache, GetFirstResult_OutOfRange)
 
     m_cmpOffset = 1;
     ASSERT_GT(m_cmpOffset, m_cmpData.size());
-    ASSERT_ANY_THROW(m_cache->GetFirstResult(m_cmpOffset, m_cmpData));
+    ASSERT_FALSE(m_cache->GetFirstResult(m_cmpOffset, m_cmpData));
 }
 
 TEST_F(TestDiffCache, GetFirstResult_WithOneMatch)
