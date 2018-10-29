@@ -11,6 +11,7 @@ namespace sf::lib
     {
     public:
         Matcher(size_t threshold, std::string needlePath, LogResultFn logResultFn);
+        ~Matcher();
         size_t Match(size_t hsDataIndex, size_t hsDataOffset, const Data& hsData);
 
     private:

@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "Matcher.h"
+#include "Log.h"
+
+size_t g_cmpCount = 0;
 
 namespace sf::lib
 {
@@ -15,6 +18,11 @@ namespace sf::lib
         }
 
         m_needleCache = diff_cache::Create(m_needleData, m_needleIteratorList);
+    }
+
+    Matcher::~Matcher()
+    {
+        LOG_INFO("compare cout - " << g_cmpCount);
     }
 
     size_t Matcher::Match(size_t hsDataIndex, size_t hsDataOffset, const Data & hsData)
@@ -62,7 +70,7 @@ namespace sf::lib
 
         for (; nlOffset + matchLen < m_needleData.size() && hsOffset + matchLen < hsData.size()
             && m_needleData.at(nlOffset + matchLen) == hsData.at(hsOffset + matchLen);
-            ++matchLen);
+            ++matchLen, ++g_cmpCount);
 
         return matchLen;
     }
