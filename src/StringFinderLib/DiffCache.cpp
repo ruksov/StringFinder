@@ -42,18 +42,19 @@ namespace sf::lib
         const Data & cmpData) const
     {
         // try to update previous result with new cmp data
+        size_t prevMatchLen = prevRes.MatchLen;
         prevRes = CompareWithCacheData(prevRes.CacheOffset
             , prevRes.CmpDataOffset
             , cmpData
             , prevRes.MatchLen);
 
-        auto prevIt = m_iteratorList.at(prevRes.CacheOffset);
+        auto& prevIt = m_iteratorList.at(prevRes.CacheOffset);
 
         if (prevIt->second.Offset != prevRes.CacheOffset            // range from prev result is sub range, which placed before
             || !prevIt->second.DiffRanges                                   // range from prev result has not any diff sub ranges
             || prevRes.CmpDataOffset + prevRes.MatchLen >= cmpData.size())  // end of cmp data range
         {
-            return std::nullopt;
+            return prevRes.MatchLen == prevMatchLen ? std::nullopt : std::make_optional(prevRes);
         }
 
         auto it = prevIt->second.DiffRanges->find(
