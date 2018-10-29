@@ -19,8 +19,6 @@ namespace sf::lib
             const MatchResult& cachedMatchRes, 
             const Data& hsData);
 
-        MatchResult GetMaxResult_FromBegin(const MatchResult & cachedMatchRes, const Data & hsData);
-
     private:
         size_t m_threashold = 0;
         CachePtr m_cache;

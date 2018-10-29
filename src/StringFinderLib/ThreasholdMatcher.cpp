@@ -61,15 +61,18 @@ namespace sf::lib
     MatchResult ThreasholdMatcher::GetMaxResult(size_t hsOffset, size_t hsDataIndex, const Data & hsData)
     {
         MatchResult maxRes(hsDataIndex);
+        maxRes.HsDataOffset = hsOffset;
 
         auto cacheRes = m_cache->GetFirstResult(hsOffset, hsData);
-        while (cacheRes)
+        if (!cacheRes)
         {
-            maxRes = cacheRes.value();
-            cacheRes = m_cache->GetNextResult(cacheRes.value(), hsData);
+            return maxRes;
         }
 
-        return maxRes;
+        CacheMatchResult tmpRes = cacheRes.value();
+        while (m_cache->GetNextResult(tmpRes, hsData));
+
+        return maxRes = tmpRes;
     }
 
     MatchResult ThreasholdMatcher::GetMaxResult(size_t hsOffset, 
@@ -101,37 +104,14 @@ namespace sf::lib
                 << "match len - " << maxRes.MatchLen);
         }
         
-        auto cacheRes = m_cache->GetNextResult(maxRes.GetCacheMatchRes(), hsData);
-        while (cacheRes)
-        {
-            maxRes = cacheRes.value();
-            cacheRes = m_cache->GetNextResult(cacheRes.value(), hsData);
-        }
-
+        auto cacheRes = maxRes.GetCacheMatchRes();
+        while (m_cache->GetNextResult(cacheRes, hsData));
+        
+        maxRes = cacheRes;
         if (maxRes.HsDataOffset != hsOffset)
         {
             maxRes.HsDataOffset = cachedMatchRes.HsDataOffset;
         }
-        return maxRes;
-    }
-
-    MatchResult ThreasholdMatcher::GetMaxResult_FromBegin(const MatchResult & cachedMatchRes, const Data & hsData)
-    {
-        MatchResult maxRes = cachedMatchRes;
-
-        // inner cache search next match result based on previous data chunck,
-        // so we subtract matchLen to create "virtual" representation of previous data chunck
-        maxRes.HsDataOffset = 0;
-        maxRes.HsDataOffset -= maxRes.MatchLen;
-        
-        auto cacheRes = m_cache->GetNextResult(maxRes.GetCacheMatchRes(), hsData);
-        while (cacheRes)
-        {
-            maxRes = cacheRes.value();
-            cacheRes = m_cache->GetNextResult(cacheRes.value(), hsData);
-        }
-
-        maxRes.HsDataOffset = cachedMatchRes.HsDataOffset;
         return maxRes;
     }
 }
