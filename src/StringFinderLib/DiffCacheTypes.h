@@ -43,11 +43,20 @@ namespace sf::lib
         // offset of the first byte 
         size_t Offset = 0;
 
+        // parent iterator
+        std::optional<DiffCacheContainer::iterator> ParentIt;
+
         // tree of ranges, which have same begin and differents starting from some byte
         std::unique_ptr<DiffCacheContainer> DiffRanges;
 
         explicit DiffCacheValue(size_t offset)
             : Offset(offset)
+        {
+        }
+
+        DiffCacheValue(size_t offset, DiffCacheContainer::iterator parentIt)
+            : Offset(offset)
+            , ParentIt(parentIt)
         {
         }
     };

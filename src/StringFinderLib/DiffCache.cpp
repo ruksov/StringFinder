@@ -133,7 +133,7 @@ namespace sf::lib
                 }
 
                 it = parentValue.DiffRanges->emplace(DiffCacheKey(childCmpOffset - dataOffset, m_cacheData.at(childCmpOffset))
-                    , DiffCacheValue(dataOffset));
+                    , DiffCacheValue(dataOffset, it.first));
             }
 
             // save to iterator list parrent string
