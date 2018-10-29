@@ -41,12 +41,24 @@ namespace sf::lib
     std::optional<CacheMatchResult> DiffCache::GetNextResult(CacheMatchResult prevRes, 
         const Data & cmpData) const
     {
+        std::optional<CacheMatchResult> returnRes;
+
         // try to update previous result with new cmp data
-        size_t prevMatchLen = prevRes.MatchLen;
-        prevRes = CompareWithCacheData(prevRes.CacheOffset
+        returnRes = CompareWithCacheData(prevRes.CacheOffset
             , prevRes.CmpDataOffset
             , cmpData
             , prevRes.MatchLen);
+
+        if (returnRes->MatchLen == prevRes.MatchLen)
+        {
+            // result already up to date
+            // so reset our return variable
+            returnRes.reset();
+        }
+        else
+        {
+            prevRes.MatchLen = returnRes->MatchLen;
+        }
 
         auto& prevIt = m_iteratorList.at(prevRes.CacheOffset);
 
@@ -54,7 +66,7 @@ namespace sf::lib
             || !prevIt->second.DiffRanges                                   // range from prev result has not any diff sub ranges
             || prevRes.CmpDataOffset + prevRes.MatchLen >= cmpData.size())  // end of cmp data range
         {
-            return prevRes.MatchLen == prevMatchLen ? std::nullopt : std::make_optional(prevRes);
+            return returnRes;
         }
 
         auto it = prevIt->second.DiffRanges->find(
@@ -63,14 +75,15 @@ namespace sf::lib
 
         if (it == prevIt->second.DiffRanges->end())
         {
-            return std::nullopt;
+            return returnRes;
         }
 
-        //++prevRes.MatchLen;
-        return CompareWithCacheData(it->second.Offset
+        returnRes = CompareWithCacheData(it->second.Offset
             , prevRes.CmpDataOffset
             , cmpData
             , prevRes.MatchLen + 1);
+
+        return returnRes;
     }
 
     void DiffCache::ConstructCache()

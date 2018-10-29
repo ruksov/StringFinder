@@ -29,7 +29,6 @@ namespace
             return GetDataSubStr(res) == GetCmpDataSubStr(res);
         }
 
-
     protected:
         Data m_data;
         Data m_cmpData;
@@ -168,4 +167,82 @@ TEST_F(TestDiffCache, GetNextResult_HasNextMatch)
 
     // must return false result
     ASSERT_FALSE(m_cache->GetNextResult(nextRes.value(), m_cmpData));
+}
+
+TEST_F(TestDiffCache, GetNextResult_UpdatePrevResult_False)
+{
+    m_data = "aaaaabbbbb";
+    ASSERT_NO_THROW(CreateCache());
+
+    m_cmpData = "bbaacccc";
+    const CacheMatchResult finalExpectRes(0, 2, 2);
+
+    // get first match result
+    auto cmpDataPart = m_cmpData.substr(0, 4);
+    auto testRes = m_cache->GetFirstResult(finalExpectRes.CmpDataOffset, cmpDataPart);
+    ASSERT_TRUE(testRes);
+    ASSERT_EQ(finalExpectRes, testRes.value());
+
+    // virtualize cmp data offset
+    testRes->CmpDataOffset = 0 - testRes->MatchLen;
+
+    // update result
+    cmpDataPart = m_cmpData.substr(4, 4);
+    ASSERT_FALSE(m_cache->GetNextResult(testRes.value(), cmpDataPart));
+}
+
+TEST_F(TestDiffCache, GetNextResult_UpdatePrevResult_True_NullSubDiffTree)
+{
+    m_data = "aaaaabbbbb";
+    ASSERT_NO_THROW(CreateCache());
+
+    m_cmpData = "bbaaaaca";
+    const CacheMatchResult finalExpectRes(0, 2, 4);
+
+    // get first match result
+    CacheMatchResult expectRes(0, 2, 2);
+    auto cmpDataPart = m_cmpData.substr(0, 4);
+    auto testRes = m_cache->GetFirstResult(expectRes.CmpDataOffset, cmpDataPart);
+    ASSERT_TRUE(testRes);
+    ASSERT_EQ(expectRes, testRes.value());
+
+    // virtualize cmp data offset
+    testRes->CmpDataOffset = 0 - testRes->MatchLen;
+
+    // update result
+    cmpDataPart = m_cmpData.substr(4, 4); 
+    testRes = m_cache->GetNextResult(testRes.value(), cmpDataPart);
+    ASSERT_TRUE(testRes);
+    ASSERT_EQ('c', cmpDataPart.at(testRes->CmpDataOffset + testRes->MatchLen));
+
+    testRes->CmpDataOffset = finalExpectRes.CmpDataOffset;
+    ASSERT_EQ(finalExpectRes, testRes.value());
+}
+
+TEST_F(TestDiffCache, GetNextResult_UpdatePrevResult_True_CmpDataEnd)
+{
+    m_data = "aaaaabbbbb";
+    ASSERT_NO_THROW(CreateCache());
+
+    m_cmpData = "bbaaaa";
+    const CacheMatchResult finalExpectRes(0, 2, 4);
+
+    // get first match result
+    CacheMatchResult expectRes(0, 2, 2);
+    auto cmpDataPart = m_cmpData.substr(0, 4);
+    auto testRes = m_cache->GetFirstResult(expectRes.CmpDataOffset, cmpDataPart);
+    ASSERT_TRUE(testRes);
+    ASSERT_EQ(expectRes, testRes.value());
+
+    // virtualize cmp data offset
+    testRes->CmpDataOffset = 0 - testRes->MatchLen;
+
+    // update result
+    cmpDataPart = m_cmpData.substr(4, 2);
+    testRes = m_cache->GetNextResult(testRes.value(), cmpDataPart);
+    ASSERT_TRUE(testRes);
+    ASSERT_EQ(cmpDataPart.size(), testRes->CmpDataOffset + testRes->MatchLen);
+
+    testRes->CmpDataOffset = finalExpectRes.CmpDataOffset;
+    ASSERT_EQ(finalExpectRes, testRes.value());
 }

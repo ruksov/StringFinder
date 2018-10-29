@@ -19,6 +19,18 @@ namespace sf::lib
             , MatchLen(matchLen)
         {
         }
+
+        bool operator==(const CacheMatchResult& other) const
+        {
+            return CacheOffset == other.CacheOffset
+                && CmpDataOffset == other.CmpDataOffset
+                && MatchLen == other.MatchLen;
+        }
+
+        bool operator!=(const CacheMatchResult& other) const
+        {
+            return !operator==(other);
+        }
     };
 
     struct ICache
