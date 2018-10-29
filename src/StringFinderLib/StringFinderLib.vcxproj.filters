@@ -39,9 +39,6 @@
     <ClInclude Include="Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Result.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CacheFactory.h">
       <Filter>Caches</Filter>
     </ClInclude>

@@ -2,8 +2,6 @@
 #include <optional>
 #include <memory>
 
-#include "Result.h"
-
 namespace sf::lib
 {
     using Data = std::string;

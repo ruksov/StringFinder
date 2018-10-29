@@ -194,7 +194,6 @@
     <ClInclude Include="DiffCacheTypes.h" />
     <ClInclude Include="MatchResult.h" />
     <ClInclude Include="ProgressBarCollection.h" />
-    <ClInclude Include="Result.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
