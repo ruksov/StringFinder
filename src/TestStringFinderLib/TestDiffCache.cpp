@@ -246,3 +246,24 @@ TEST_F(TestDiffCache, GetNextResult_UpdatePrevResult_True_CmpDataEnd)
     testRes->CmpDataOffset = finalExpectRes.CmpDataOffset;
     ASSERT_EQ(finalExpectRes, testRes.value());
 }
+
+TEST_F(TestDiffCache, GetNextResult_FindParentIterator)
+{
+    m_data = "aaaaabcaaad";
+    ASSERT_NO_THROW(CreateCache());
+
+    m_cmpData = "caaaaab";
+    const CacheMatchResult finalExpectRes(0, 1, 6);
+
+    // get first match result
+    CacheMatchResult tmpExpectRes(m_data.find('c'), 0, 4);
+    auto testRes = m_cache->GetFirstResult(0, m_cmpData);
+    ASSERT_TRUE(testRes);
+    ASSERT_EQ(tmpExpectRes, testRes.value());
+
+    // create prev res to check possibility for optimization
+    CacheMatchResult optimizeRes(testRes->CacheOffset + 1, testRes->CmpDataOffset + 1, testRes->MatchLen - 1);
+    testRes = m_cache->GetNextResult(optimizeRes, m_cmpData);
+    ASSERT_TRUE(testRes);
+    ASSERT_EQ(finalExpectRes, testRes.value());
+}

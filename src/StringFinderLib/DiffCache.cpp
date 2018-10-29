@@ -60,9 +60,26 @@ namespace sf::lib
             prevRes.MatchLen = returnRes->MatchLen;
         }
 
-        auto& prevIt = m_iteratorList.at(prevRes.CacheOffset);
+        auto prevIt = m_iteratorList.at(prevRes.CacheOffset);
 
-        if (prevIt->second.Offset != prevRes.CacheOffset            // range from prev result is sub range, which placed before
+        if (prevRes.MatchLen <= prevIt->first.DiffOffset)
+        {
+            // try to find parent iterator with diff offset less than match length
+            // because maybe in higher part of tree we can find bigger match result
+            auto parentIt = FindHighestParent(prevRes.MatchLen, prevIt);
+            if (parentIt)
+            {
+                prevIt = parentIt.value();
+                prevRes = CompareWithCacheData(prevIt->second.Offset
+                    , prevRes.CmpDataOffset
+                    , cmpData
+                    , prevRes.MatchLen);
+
+                returnRes = prevRes;
+            }
+        }
+
+        if (prevIt->second.Offset != prevRes.CacheOffset                    // range from prev result is sub range, which placed before
             || !prevIt->second.DiffRanges                                   // range from prev result has not any diff sub ranges
             || prevRes.CmpDataOffset + prevRes.MatchLen >= cmpData.size())  // end of cmp data range
         {
@@ -156,6 +173,20 @@ namespace sf::lib
             ; ++res.MatchLen);
 
         return res;
+    }
+
+    std::optional<DiffCacheContainer::iterator> DiffCache::FindHighestParent(size_t matchLen, DiffCacheContainer::iterator & it) const
+    {
+        std::optional<DiffCacheContainer::iterator> parentIt = it->second.ParentIt;
+
+        while (parentIt 
+            && parentIt.value()->second.ParentIt 
+            && matchLen <= it->first.DiffOffset)
+        {
+            parentIt = parentIt.value()->second.ParentIt;
+        }
+
+        return parentIt;
     }
 }
 

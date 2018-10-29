@@ -29,6 +29,11 @@ namespace sf::lib
             const Data& cmpData, 
             size_t cachedMatchLen = 0) const;
 
+        // return first parent iterator in it diff cache tree,
+        // which has diff offset less than match length
+        std::optional<DiffCacheContainer::iterator> FindHighestParent(size_t matchLen,
+            DiffCacheContainer::iterator& it) const;
+
     private:
         Data m_cacheData;
         DiffCacheContainer m_cache;
