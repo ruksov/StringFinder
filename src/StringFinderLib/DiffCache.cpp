@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "DiffCache.h"
 #include "Exceptions.h"
+#include "Log.h"
+
+size_t g_cmpCount = 0;
 
 namespace sf::lib
 {
@@ -8,6 +11,11 @@ namespace sf::lib
         : m_cacheData(std::move(cacheData))
     {
         ConstructCache();
+    }
+
+    DiffCache::~DiffCache()
+    {
+        LOG_INFO("compare count - " << g_cmpCount);
     }
 
     const Data & DiffCache::GetCacheData() const
@@ -35,7 +43,7 @@ namespace sf::lib
             return std::nullopt;
         }
 
-        return CompareWithCacheData(it->second.Offset, cmpDataOffset, cmpData, 1);
+        return CompareWithCacheData(it->second.Offset, cmpDataOffset, cmpData);
     }
 
     std::optional<CacheMatchResult> DiffCache::GetNextResult(CacheMatchResult prevRes, 
@@ -98,7 +106,7 @@ namespace sf::lib
         returnRes = CompareWithCacheData(it->second.Offset
             , prevRes.CmpDataOffset
             , cmpData
-            , prevRes.MatchLen + 1);
+            , prevRes.MatchLen);
 
         return returnRes;
     }
@@ -170,7 +178,7 @@ namespace sf::lib
         for (; cacheDataOffset + res.MatchLen < m_cacheData.size()
             && cmpDataOffset + res.MatchLen < cmpData.size()
             && m_cacheData.at(cacheDataOffset + res.MatchLen) == cmpData.at(cmpDataOffset + res.MatchLen)
-            ; ++res.MatchLen);
+            ; ++res.MatchLen, ++g_cmpCount);
 
         return res;
     }

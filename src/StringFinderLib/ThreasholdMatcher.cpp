@@ -50,7 +50,7 @@ namespace sf::lib
             }
         }
 
-        if (maxRes.MatchLen > 3 && maxRes.HsDataIndex == hsDataIndex)
+        if (maxRes.MatchLen > 2 && maxRes.HsDataIndex == hsDataIndex)
         {
             m_cachedMatchRes = maxRes;
         }

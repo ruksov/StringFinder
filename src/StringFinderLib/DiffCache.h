@@ -8,6 +8,7 @@ namespace sf::lib
     {
     public:
         explicit DiffCache(Data cacheData);
+        ~DiffCache();
         
         const Data& GetCacheData() const override;
 
