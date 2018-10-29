@@ -45,6 +45,7 @@ namespace sf
         *resultHandler = [this](const lib::MatchResult& res) { PrintResult(res); };
         matcher->AddResultHandler(resultHandler);
 
+        const size_t hsDataCount = haystack->GetDataCount();
         lib::ProgressBarCollection progressView(haystack->GetDataCount());
         progressView.AddCallback("console", lib::ConsoleProgressBar);
         
@@ -55,7 +56,7 @@ namespace sf
             const size_t hsIndex = haystack->GetIndex();
             const auto hsDataSize = hsData.get().size();
            
-            LOG_DEBUG("Start handle haystack data #" << hsIndex);
+            LOG_DEBUG("Start handle haystack data #" << hsIndex << " from " << hsDataCount);
             progressView.OnProgressChange(hsIndex);
             for (size_t i = 0; i < hsDataSize;)
             {

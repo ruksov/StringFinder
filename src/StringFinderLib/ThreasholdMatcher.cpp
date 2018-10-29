@@ -16,45 +16,46 @@ namespace sf::lib
     {
         MatchResult maxRes(hsDataIndex);
 
-        if (hsOffset == 0 && m_matchResFromPrevChunck)
+        if (m_cachedMatchRes)
         {
-            // try to end match action from previous haystack data chunck
-            maxRes = GetMaxResult_FromBegin(m_matchResFromPrevChunck.value(), hsData);
-
-            m_matchResFromPrevChunck.reset();
+            maxRes = GetMaxResult(hsOffset, m_cachedMatchRes.value(), hsData);
+            m_cachedMatchRes.reset();
         }
         else
         {
             maxRes = GetMaxResult(hsOffset, hsDataIndex, hsData);
         }
-
-        size_t matchLen = 0;
-
-        if (maxRes.HsDataIndex == hsDataIndex 
+        
+        if (maxRes.HsDataOffset == hsOffset
             && maxRes.HsDataOffset + maxRes.MatchLen == hsData.size())
         {
-            m_matchResFromPrevChunck = maxRes;
-            matchLen = maxRes.MatchLen;
+            m_cachedMatchRes = maxRes;
+            m_cachedMatchRes->HsDataIndex = hsDataIndex;
+            return maxRes.MatchLen;
         }
-        else if (maxRes.MatchLen >= m_threashold)
+
+        if (maxRes.MatchLen >= m_threashold)
         {
-            // notify all observers 
-            // we find match result
             NotifyAll(maxRes);
 
             if (maxRes.HsDataIndex != hsDataIndex)
             {
                 // find result from previous chunk
                 // so we need to fix match length
-                matchLen = maxRes.HsDataOffset + maxRes.MatchLen - m_cache->GetCacheData().size();
+                return maxRes.HsDataOffset + maxRes.MatchLen - m_cache->GetCacheData().size();
             }
             else
             {
-                matchLen = maxRes.MatchLen;
+                return maxRes.MatchLen;
             }
         }
- 
-        return matchLen;
+
+        if (maxRes.MatchLen > 3 && maxRes.HsDataIndex == hsDataIndex)
+        {
+            m_cachedMatchRes = maxRes;
+        }
+
+        return 0;
     }
 
     MatchResult ThreasholdMatcher::GetMaxResult(size_t hsOffset, size_t hsDataIndex, const Data & hsData)
@@ -68,6 +69,49 @@ namespace sf::lib
             cacheRes = m_cache->GetNextResult(cacheRes.value(), hsData);
         }
 
+        return maxRes;
+    }
+
+    MatchResult ThreasholdMatcher::GetMaxResult(size_t hsOffset, 
+        const MatchResult & cachedMatchRes, 
+        const Data & hsData)
+    {
+        MatchResult maxRes = cachedMatchRes;
+
+        if (hsOffset == 0)
+        {
+            // inner cache search next match result based on previous data chunck,
+            // so we subtract matchLen to create "virtual" representation of previous data chunck
+            maxRes.HsDataOffset = 0 - maxRes.MatchLen;
+        }
+        else if (maxRes.HsDataOffset + 1 == hsOffset)
+        {
+            maxRes.HsDataOffset = hsOffset;
+            ++maxRes.NlOffset;
+            --maxRes.MatchLen;
+        }
+        else
+        {
+            THROW("Some error."
+                << "Current hs offset - " << hsOffset << '\n'
+                << "Cached match result:\n"
+                << "hs index - " << maxRes.HsDataIndex << '\n'
+                << "hs offset - " << maxRes.HsDataOffset << '\n'
+                << "nl offset - " << maxRes.NlOffset << '\n'
+                << "match len - " << maxRes.MatchLen);
+        }
+        
+        auto cacheRes = m_cache->GetNextResult(maxRes.GetCacheMatchRes(), hsData);
+        while (cacheRes)
+        {
+            maxRes = cacheRes.value();
+            cacheRes = m_cache->GetNextResult(cacheRes.value(), hsData);
+        }
+
+        if (maxRes.HsDataOffset != hsOffset)
+        {
+            maxRes.HsDataOffset = cachedMatchRes.HsDataOffset;
+        }
         return maxRes;
     }
 

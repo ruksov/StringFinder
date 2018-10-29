@@ -181,7 +181,7 @@ namespace sf::lib
 
         while (parentIt 
             && parentIt.value()->second.ParentIt 
-            && matchLen <= it->first.DiffOffset)
+            && matchLen <= parentIt.value()->first.DiffOffset)
         {
             parentIt = parentIt.value()->second.ParentIt;
         }
