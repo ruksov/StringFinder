@@ -31,8 +31,7 @@ namespace sf::lib
         size_t operator()(DiffCacheKey const& k) const noexcept
         {
             const size_t h1 = std::hash<char>()(k.DiffByte);
-            const size_t h2 = k.DiffOffset;
-            return (h1 << 32) ^ h2;
+            return h1 ^ (k.DiffOffset << 1);
         }
     };
 
