@@ -44,6 +44,8 @@ namespace sf::lib
         virtual std::optional<CacheMatchResult> GetFirstResult(size_t cmpDataOffset, 
             const Data& cmpData) const = 0;
 
+        virtual bool GetFirstResult(CacheMatchResult& inOutRes, const Data& cmpData) = 0;
+
         // return next possible match result with passed data after previous result
         virtual  bool GetNextResult(CacheMatchResult& inOutRes,
             const Data& cmpData) const = 0;

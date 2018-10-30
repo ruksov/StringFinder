@@ -18,13 +18,15 @@ namespace sf::lib
 
         if (m_cachedMatchRes)
         {
-            maxRes = GetMaxResult(hsOffset, m_cachedMatchRes.value(), hsData);
+            maxRes = m_cachedMatchRes.value();
             m_cachedMatchRes.reset();
         }
         else
         {
-            maxRes = GetMaxResult(hsOffset, hsDataIndex, hsData);
+            maxRes.HsDataOffset = hsOffset;
         }
+
+        GetMaxResult(hsOffset, maxRes, hsData);
         
         if (maxRes.HsDataOffset == hsOffset
             && maxRes.HsDataOffset + maxRes.MatchLen == hsData.size())
@@ -56,6 +58,43 @@ namespace sf::lib
         }
 
         return 0;
+    }
+
+    void ThreasholdMatcher::GetMaxResult(size_t hsOffset, MatchResult & inOutRes, const Data & hsData)
+    {
+        size_t savedHsOffset = inOutRes.HsDataOffset;
+
+        if (inOutRes.HsDataOffset + inOutRes.MatchLen >= hsData.size())
+        {
+            // inner cache search next match result based on previous data chunck,
+            // so we subtract matchLen to create "virtual" representation of previous data chunck
+            inOutRes.HsDataOffset = 0 - inOutRes.MatchLen;
+        }
+        else if (inOutRes.HsDataOffset + 1 == hsOffset && inOutRes.MatchLen != 0)
+        {
+            savedHsOffset = ++inOutRes.HsDataOffset;
+            ++inOutRes.NlOffset;
+            --inOutRes.MatchLen;
+        }
+        else if (inOutRes.MatchLen != 0)
+        {
+            THROW("Some error."
+                << "Current hs offset - " << hsOffset << '\n'
+                << "Cached match result:\n"
+                << "hs index - " << inOutRes.HsDataIndex << '\n'
+                << "hs offset - " << inOutRes.HsDataOffset << '\n'
+                << "nl offset - " << inOutRes.NlOffset << '\n'
+                << "match len - " << inOutRes.MatchLen);
+        }
+
+        auto cacheRes = inOutRes.GetCacheMatchRes();
+        if (m_cache->GetFirstResult(cacheRes, hsData))
+        {
+            while (m_cache->GetNextResult(cacheRes, hsData));
+        }
+
+        inOutRes = cacheRes;
+        inOutRes.HsDataOffset = savedHsOffset;
     }
 
     MatchResult ThreasholdMatcher::GetMaxResult(size_t hsOffset, size_t hsDataIndex, const Data & hsData)

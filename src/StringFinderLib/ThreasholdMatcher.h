@@ -11,6 +11,8 @@ namespace sf::lib
         size_t Match(size_t hsOffset, size_t hsDataIndex, const Data& hsData) override;
 
     private:
+        void GetMaxResult(size_t hsOffset, MatchResult& inOutRes, const Data& hsData);
+
         MatchResult GetMaxResult(size_t hsOffset,
             size_t hsDataIndex,
             const Data& hsData);

@@ -19,7 +19,7 @@ namespace sf::lib
         std::optional<CacheMatchResult> GetFirstResult(size_t cmpDataOffset, 
             const Data& cmpData) const override;
 
-        bool GetFirstResult(CacheMatchResult& inOutRes, const Data& cmpData);
+        bool GetFirstResult(CacheMatchResult& inOutRes, const Data& cmpData) override;
 
         // return next possible match result with passed data after previous result
         bool GetNextResult(CacheMatchResult& inOutRes, 

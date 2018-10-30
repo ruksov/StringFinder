@@ -48,20 +48,15 @@ namespace sf::lib
 
     bool DiffCache::GetFirstResult(CacheMatchResult & inOutRes, const Data & cmpData)
     {
-        if (inOutRes.CmpDataOffset >= cmpData.size())
-        {
-            return false;
-        }
-
         auto it = m_cache.end();
         if (inOutRes.MatchLen != 0)
         {
             // find more suitable node for comparation
             it = FindHighestParent(inOutRes.MatchLen, m_iteratorList.at(inOutRes.CacheOffset));
         }
-        else
+        else if (inOutRes.CmpDataOffset < cmpData.size())
         {
-            auto it = m_cache.find(DiffCacheKey(0, cmpData.at(inOutRes.CmpDataOffset)));
+            it = m_cache.find(DiffCacheKey(0, cmpData.at(inOutRes.CmpDataOffset)));
         }
 
         if (it == m_cache.end())
@@ -75,7 +70,7 @@ namespace sf::lib
             , cmpData
             , inOutRes.MatchLen);
         inOutRes.MatchLen += addMatchLen;
-        return !!addMatchLen;
+        return true;
     }
 
     bool DiffCache::GetNextResult(CacheMatchResult& inOutRes,
