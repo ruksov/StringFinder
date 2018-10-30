@@ -19,6 +19,8 @@ namespace sf::lib
         std::optional<CacheMatchResult> GetFirstResult(size_t cmpDataOffset, 
             const Data& cmpData) const override;
 
+        bool GetFirstResult(CacheMatchResult& inOutRes, const Data& cmpData);
+
         // return next possible match result with passed data after previous result
         bool GetNextResult(CacheMatchResult& inOutRes, 
             const Data& cmpData) const override;
@@ -32,8 +34,8 @@ namespace sf::lib
 
         // return first parent iterator in it diff cache tree,
         // which has diff offset less than match length
-        std::optional<DiffCacheContainer::iterator> FindHighestParent(size_t matchLen,
-            DiffCacheContainer::iterator& it) const;
+        DiffCacheContainer::iterator& FindHighestParent(size_t matchLen,
+            DiffCacheContainer::iterator& it);
 
     private:
         Data m_cacheData;

@@ -41,22 +41,24 @@ namespace sf::lib
     struct DiffCacheValue
     {
         // offset of the first byte 
-        size_t Offset = 0;
+        size_t Offset;
 
         // parent iterator
-        std::optional<DiffCacheContainer::iterator> ParentIt;
+        // if node has not parent it is equal Offset field
+        size_t ParentOffset;
 
         // tree of ranges, which have same begin and differents starting from some byte
         std::unique_ptr<DiffCacheContainer> DiffRanges;
 
         explicit DiffCacheValue(size_t offset)
             : Offset(offset)
+            , ParentOffset(offset)
         {
         }
 
-        DiffCacheValue(size_t offset, DiffCacheContainer::iterator parentIt)
+        DiffCacheValue(size_t offset, size_t parentOffset)
             : Offset(offset)
-            , ParentIt(parentIt)
+            , ParentOffset(parentOffset)
         {
         }
     };
