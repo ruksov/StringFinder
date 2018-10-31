@@ -1,13 +1,13 @@
 #pragma once
 #include "IMatcher.h"
 #include "Exceptions.h"
-#include "ThreasholdMatcher.h"
+#include "ThresholdMatcher.h"
 
 namespace sf::lib
 {
     enum class MatcherType
     {
-        ThreasholdMatcher = 0,
+        ThresholdMatcher = 0,
         Unknown
     };
 
@@ -18,8 +18,8 @@ namespace sf::lib
 
         switch (matcherType)
         {
-        case MatcherType::ThreasholdMatcher:
-            matcher = std::make_unique<ThreasholdMatcher>(std::forward<CtorArgs>(ctorArgs)...);
+        case MatcherType::ThresholdMatcher:
+            matcher = std::make_unique<ThresholdMatcher>(std::forward<CtorArgs>(ctorArgs)...);
             break;
 
         case MatcherType::Unknown:

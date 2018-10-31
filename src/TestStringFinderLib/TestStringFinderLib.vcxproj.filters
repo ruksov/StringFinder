@@ -38,7 +38,7 @@
     <ClCompile Include="TestDiffCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestThreasholdMatcher.cpp">
+    <ClCompile Include="TestThresholdMatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

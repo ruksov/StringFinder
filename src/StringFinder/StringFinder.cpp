@@ -35,7 +35,7 @@ namespace sf
         auto haystack = std::make_unique<lib::DoubleBuffer>(std::move(haystackReader));
 
         LOG_INFO("Initialize matcher");
-        auto matcher = lib::MatcherFactory(lib::MatcherType::ThreasholdMatcher
+        auto matcher = lib::MatcherFactory(lib::MatcherType::ThresholdMatcher
             , threshold
             , lib::CacheFactory(lib::CacheType::DiffCache, std::move(needleData)));
         LOG_INFO("Finish initialize matcher");;

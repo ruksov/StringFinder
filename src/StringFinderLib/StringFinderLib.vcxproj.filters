@@ -60,9 +60,6 @@
     <ClInclude Include="MatchResult.h">
       <Filter>Matchers</Filter>
     </ClInclude>
-    <ClInclude Include="ThreasholdMatcher.h">
-      <Filter>Matchers</Filter>
-    </ClInclude>
     <ClInclude Include="FileReader.h">
       <Filter>Buffers</Filter>
     </ClInclude>
@@ -77,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="ConsoleProgressBar.h">
       <Filter>ProgressBars</Filter>
+    </ClInclude>
+    <ClInclude Include="ThresholdMatcher.h">
+      <Filter>Matchers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +95,6 @@
     <ClCompile Include="IMatcher.cpp">
       <Filter>Matchers</Filter>
     </ClCompile>
-    <ClCompile Include="ThreasholdMatcher.cpp">
-      <Filter>Matchers</Filter>
-    </ClCompile>
     <ClCompile Include="DoubleBuffer.cpp">
       <Filter>Buffers</Filter>
     </ClCompile>
@@ -109,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="ProgressBarCollection.cpp">
       <Filter>ProgressBars</Filter>
+    </ClCompile>
+    <ClCompile Include="ThresholdMatcher.cpp">
+      <Filter>Matchers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
