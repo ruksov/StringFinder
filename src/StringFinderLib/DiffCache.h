@@ -15,15 +15,14 @@ namespace sf::lib
         // reset inner cache
         void Reset(Data cacheData) override;
 
-        // return first possible match result with passed data
-        std::optional<CacheMatchResult> GetFirstResult(size_t cmpDataOffset, 
-            const Data& cmpData) const override;
-
+		// If inOutRes specified it will be updated to more suitable result,
+		// else it will be filled first match result in diff tree.
+		// This result will be used to try find next result in GetNextResult.
+		// Method returns true if inOutRes changed and can be used.
         bool GetFirstResult(CacheMatchResult& inOutRes, const Data& cmpData) override;
 
         // return next possible match result with passed data after previous result
-        bool GetNextResult(CacheMatchResult& inOutRes, 
-            const Data& cmpData) const override;
+        bool GetNextResult(CacheMatchResult& inOutRes, const Data& cmpData) override;
 
     private:
         void ConstructCache();

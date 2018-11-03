@@ -40,15 +40,15 @@ namespace sf::lib
         // reset inner cache
         virtual void Reset(Data cacheData) = 0;
 
-        // return first possible match result with passed data
-        virtual std::optional<CacheMatchResult> GetFirstResult(size_t cmpDataOffset, 
-            const Data& cmpData) const = 0;
+		// If inOutRes specified it will be updated to more suitable result,
+		// else it will be filled first match result in diff tree.
+		// This result will be used to try find next result in GetNextResult.
+		// Method returns true if inOutRes changed and can be used.
+		virtual bool GetFirstResult(CacheMatchResult& inOutRes, const Data& cmpData) = 0;
 
-        virtual bool GetFirstResult(CacheMatchResult& inOutRes, const Data& cmpData) = 0;
-
-        // return next possible match result with passed data after previous result
-        virtual  bool GetNextResult(CacheMatchResult& inOutRes,
-            const Data& cmpData) const = 0;
+        // inOutRes - next possible match result with passed data after previous result
+        // Method returns true if inOutRes changed and can be used.
+        virtual  bool GetNextResult(CacheMatchResult& inOutRes, const Data& cmpData) = 0;
     };
 
     using CachePtr = std::unique_ptr<ICache>;

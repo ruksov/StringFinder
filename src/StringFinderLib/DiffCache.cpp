@@ -29,57 +29,44 @@ namespace sf::lib
         ConstructCache();
     }
 
-    std::optional<CacheMatchResult> DiffCache::GetFirstResult(size_t cmpDataOffset, 
-        const Data & cmpData) const
-    {
-        if (cmpDataOffset >= cmpData.size())
-        {
-            return std::nullopt;
-        }
-
-        auto it = m_cache.find(DiffCacheKey(0, cmpData.at(cmpDataOffset)));
-        if (it == m_cache.end())
-        {
-            return std::nullopt;
-        }
-
-        return CacheMatchResult(it->second.Offset, cmpDataOffset, CompareWithCacheData(it->second.Offset, cmpDataOffset, cmpData));
-    }
-
     bool DiffCache::GetFirstResult(CacheMatchResult & inOutRes, const Data & cmpData)
     {
-        auto it = m_cache.end();
+        std::optional<size_t> updatedCacheOffset;
         if (inOutRes.MatchLen != 0)
         {
             // find more suitable node for comparation
-            it = FindHighestParent(inOutRes.MatchLen, m_iteratorList.at(inOutRes.CacheOffset));
+            auto it = FindHighestParent(inOutRes.MatchLen, m_iteratorList.at(inOutRes.CacheOffset));
+            updatedCacheOffset = it->second.Offset;
         }
         else if (inOutRes.CmpDataOffset < cmpData.size())
         {
-            it = m_cache.find(DiffCacheKey(0, cmpData.at(inOutRes.CmpDataOffset)));
+            auto it = m_cache.find(DiffCacheKey(0, cmpData.at(inOutRes.CmpDataOffset)));
+            if (it != m_cache.end())
+            {
+                updatedCacheOffset = it->second.Offset;
+            }
         }
 
-        if (it == m_cache.end())
+        if (!updatedCacheOffset)
         {
             return false;
         }
 
-        inOutRes.CacheOffset = it->second.Offset;
+        inOutRes.CacheOffset = updatedCacheOffset.value();
         size_t addMatchLen = CompareWithCacheData(inOutRes.CacheOffset
             , inOutRes.CmpDataOffset
             , cmpData
             , inOutRes.MatchLen);
         inOutRes.MatchLen += addMatchLen;
-        return true;
+        return addMatchLen != 0;
     }
 
-    bool DiffCache::GetNextResult(CacheMatchResult& inOutRes,
-        const Data & cmpData) const
+    bool DiffCache::GetNextResult(CacheMatchResult& inOutRes, const Data & cmpData)
     {
         auto prevIt = m_iteratorList.at(inOutRes.CacheOffset);
-        if (prevIt->second.Offset != inOutRes.CacheOffset                    // range from prev result is sub range, which placed before
-            || !prevIt->second.DiffRanges                                   // range from prev result has not any diff sub ranges
-            || inOutRes.CmpDataOffset + inOutRes.MatchLen >= cmpData.size())  // end of cmp data range
+        if (prevIt->second.Offset != inOutRes.CacheOffset                       // range from prev result is sub range, which placed before
+            || !prevIt->second.DiffRanges                                       // range from prev result has not any diff sub ranges
+            || inOutRes.CmpDataOffset + inOutRes.MatchLen >= cmpData.size())    // end of cmp data range
         {
             return false;
         }

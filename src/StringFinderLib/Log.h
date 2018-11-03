@@ -20,7 +20,7 @@ namespace fs = std::experimental::filesystem;
 
 #define LOG_INFO(__msg__)                           \
 {                                                   \
-    std::stringstream ss;                          \
+    std::stringstream ss;                           \
     ss << "[INFO]: " << __msg__;                    \
     sf::lib::LogThreadSafe(std::move(ss));          \
 }
@@ -44,5 +44,6 @@ namespace fs = std::experimental::filesystem;
 
 namespace sf::lib
 {
+    void InitLog();
     void LogThreadSafe(std::stringstream ss);
 }

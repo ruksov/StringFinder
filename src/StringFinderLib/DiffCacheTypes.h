@@ -59,5 +59,6 @@ namespace sf::lib
             , ParentOffset(parentOffset)
         {
         }
+#pragma warning (suppress : 26495)  // always initialize ParentOffset (bug)
     };
 }
