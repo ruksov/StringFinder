@@ -64,8 +64,7 @@ namespace sf::lib
     bool DiffCache::GetNextResult(CacheMatchResult& inOutRes, const Data & cmpData)
     {
         auto prevIt = m_iteratorList.at(inOutRes.CacheOffset);
-        if (prevIt->second.Offset != inOutRes.CacheOffset                       // range from prev result is sub range, which placed before
-            || !prevIt->second.DiffRanges                                       // range from prev result has not any diff sub ranges
+        if (!prevIt->second.DiffRanges                                          // range from prev result has not any diff sub ranges
             || inOutRes.CmpDataOffset + inOutRes.MatchLen >= cmpData.size())    // end of cmp data range
         {
             return false;
