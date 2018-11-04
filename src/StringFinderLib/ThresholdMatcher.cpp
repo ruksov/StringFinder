@@ -9,7 +9,9 @@ namespace sf::lib
         , m_cache(std::move(cache))
     {
         THROW_IF(!m_cache, "Failed to create threashold matcher. Cache object is null.");
-        THROW_IF(m_threshold > m_cache->GetCacheData().size(), "Failed to create threashold matcher. Threashold can't be greater than needle file size.");
+
+        m_cacheSize = m_cache->GetCacheData().size();
+        THROW_IF(m_threshold > m_cacheSize, "Failed to create threashold matcher. Threashold can't be greater than needle file size.");
     }
 
     size_t ThresholdMatcher::Match(size_t hsOffset, size_t hsDataIndex, const Data & hsData)
@@ -43,7 +45,7 @@ namespace sf::lib
             {
                 // find result from previous chunk
                 // so we need to fix match length
-                return maxRes.HsDataOffset + maxRes.MatchLen - m_cache->GetCacheData().size();
+                return maxRes.HsDataOffset + maxRes.MatchLen - m_cacheSize;
             }
             else
             {

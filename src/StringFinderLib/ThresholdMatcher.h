@@ -16,6 +16,7 @@ namespace sf::lib
     private:
         size_t m_threshold = 0;
         CachePtr m_cache;
+        size_t m_cacheSize = 0;
         std::optional<MatchResult> m_cachedMatchRes;
     };
 }
