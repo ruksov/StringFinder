@@ -12,7 +12,7 @@ namespace fs = std::experimental::filesystem;
         << fs::path(__FILE__).filename()            \
         << "(" << __LINE__ << "), "                 \
         << __FUNCTION__ << ": " << __msg__;         \
-    sf::lib::LogThreadSafe(std::move(ss));          \
+    sf::log::LogThreadSafe(std::move(ss));          \
 }
 #else
 #define LOG_DEBUG(...)
@@ -22,7 +22,7 @@ namespace fs = std::experimental::filesystem;
 {                                                   \
     std::stringstream ss;                           \
     ss << "[INFO]: " << __msg__;                    \
-    sf::lib::LogThreadSafe(std::move(ss));          \
+    sf::log::LogThreadSafe(std::move(ss));          \
 }
 
 #define LOG_ERROR_EX(__msg__)                       \
@@ -32,17 +32,17 @@ namespace fs = std::experimental::filesystem;
         << fs::path(__FILE__).filename()            \
         << "(" << __LINE__ << "), "                 \
         << __FUNCTION__ << ": " << __msg__;         \
-    sf::lib::LogThreadSafe(std::move(ss));          \
+    sf::log::LogThreadSafe(std::move(ss));          \
 }
 
 #define LOG_ERROR(__msg__)                          \
 {                                                   \
     std::stringstream ss;                          \
     ss << "[ERROR]: " << __msg__;                   \
-    sf::lib::LogThreadSafe(std::move(ss));          \
+    sf::log::LogThreadSafe(std::move(ss));          \
 }
 
-namespace sf::lib
+namespace sf::log
 {
     void InitLog();
     void LogThreadSafe(std::stringstream ss);

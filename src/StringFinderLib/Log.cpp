@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Log.h"
 
-namespace sf::lib
+namespace sf::log
 {
     namespace config
     {
